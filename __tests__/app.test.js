@@ -162,4 +162,62 @@ describe("/api/articles/:article_id/comments", () => {
         });
     });
   });
+  describe("POST", () => {
+    test("POST 201: Returns newly created comment", () => {
+      const newComment = {
+        username: "lurker",
+        body: "This is an example comment",
+      };
+      return request(app)
+        .post("/api/articles/2/comments")
+        .send(newComment)
+        .expect(201)
+        .then(({ body: { comment } }) => {
+          expect(comment.body).toBe(newComment.body);
+          expect(comment.author).toBe(newComment.username);
+          expect(comment.comment_id).toBeNumber();
+          expect(comment.votes).toBe(0);
+          expect(comment.created_at).toBeString();
+          expect(comment.article_id).toBe(2);
+        });
+    });
+    test("POST 404: Returns article not found if article_id does not exist", () => {
+      const newComment = {
+        username: "lurker",
+        body: "This is an example comment",
+      };
+      return request(app)
+        .post("/api/articles/200/comments")
+        .send(newComment)
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Article not found");
+        });
+    });
+    test("POST 400: Returns bad request when passed an article_id that is not an integer", () => {
+      const newComment = {
+        username: "lurker",
+        body: "This is an example comment",
+      };
+      return request(app)
+        .post("/api/articles/not-a-number/comments")
+        .send(newComment)
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test("POST 400: Returns bad request when passed incomplete data", () => {
+      const newComment = {
+        body: "This is an example comment",
+      };
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send(newComment)
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+  });
 });
