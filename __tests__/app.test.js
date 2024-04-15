@@ -133,7 +133,7 @@ describe("/api/articles/:article_id/comments", () => {
             expect(typeof comment.created_at).toBe("string");
             expect(typeof comment.author).toBe("string");
             expect(typeof comment.body).toBe("string");
-            expect(typeof comment.article_id).toBe("number");
+            expect(comment.article_id).toBe(1);
           });
         });
     });
@@ -161,6 +161,14 @@ describe("/api/articles/:article_id/comments", () => {
           expect(msg).toBe("Article not found");
         });
     });
+      test('GET 400: Returns bad request if article_id is not an integer', () => {
+        return request(app)
+        .get("/api/articles/not-a-number/comments")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+      })
   });
   describe("POST", () => {
     test("POST 201: Returns newly created comment", () => {
