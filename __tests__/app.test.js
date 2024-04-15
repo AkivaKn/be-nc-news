@@ -3,6 +3,7 @@ const app = require("../db/app");
 const data = require("../db/data/test-data");
 const seed = require("../db/seeds/seed");
 const db = require("../db/connection");
+const endpoints = require('../endpoints.json')
 
 afterAll(() => {
     db.end()
@@ -35,6 +36,16 @@ describe('/api/topics', () => {
                         expect(typeof topic.slug).toBe('string')
                     })
             })
+        })
+    })
+})
+describe('/api', () => {
+    test('GET 200: Responds with enpoints.json file', () => {
+        return request(app)
+            .get('/api')
+            .expect(200)
+            .then(({ body }) => {
+            expect(body).toEqual(endpoints)
         })
     })
 })
