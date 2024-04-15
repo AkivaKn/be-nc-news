@@ -4,6 +4,7 @@ const data = require("../db/data/test-data");
 const seed = require("../db/seeds/seed");
 const db = require("../db/connection");
 const endpoints = require("../endpoints.json");
+const { reduceRight } = require("../db/data/test-data/articles");
 
 afterAll(() => {
   db.end();
@@ -110,10 +111,54 @@ describe("/api/articles", () => {
     });
     test("GET 200: Array has default sorting of desc by date(created_at)", () => {
       return request(app)
-          .get("/api/articles")
-          .expect(200)
-          .then(({ body: { articles } }) => {
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body: { articles } }) => {
           expect(articles).toBeSortedBy("created_at", { descending: true });
+        });
+    });
+  });
+});
+describe("/api/articles/:article_id/comments", () => {
+  describe("GET", () => {
+    test("GET 200: Responds with an array of comments with the correct keys", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments.length).toBe(11);
+          comments.forEach((comment) => {
+            expect(typeof comment.comment_id).toBe("number");
+            expect(typeof comment.votes).toBe("number");
+            expect(typeof comment.created_at).toBe("string");
+            expect(typeof comment.author).toBe("string");
+            expect(typeof comment.body).toBe("string");
+            expect(typeof comment.article_id).toBe("number");
+          });
+        });
+    });
+    test("GET 200: Response is sorted by default by date descending", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments).toBeSortedBy("created_at", { descending: true });
+        });
+    });
+    test("GET 200: Responds with an empty array if requested an article that exists but has no comments", () => {
+      return request(app)
+        .get("/api/articles/2/comments")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments.length).toBe(0);
+        });
+    });
+    test("GET 404: Returns article not found if no such article exists", () => {
+      return request(app)
+        .get("/api/articles/100/comments")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Article not found");
         });
     });
   });
