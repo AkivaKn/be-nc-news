@@ -12,7 +12,7 @@ beforeEach(() => {
     return seed(data)
 })
 
-describe('/api/topics', () => {
+describe('Error handling', () => {
     test('404 Not found: Responds appropriately when endpoint does not exist', () => {
         return request(app)
             .get('/api/does-not-exist')
@@ -21,6 +21,8 @@ describe('/api/topics', () => {
             expect(msg).toBe('Path not found')
         })
     })
+})
+describe('/api/topics', () => { 
     describe('GET', () => {
         test('GET 200: Responds with an array of topic objects each containing a slug and description key', () => {
             return request(app)
