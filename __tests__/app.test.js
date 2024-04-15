@@ -88,14 +88,13 @@ describe("/api/articles/:article_id", () => {
 });
 describe("/api/articles", () => {
   describe("GET", () => {
-    test("GET 200: Responds with an array of article objects sorted by date, with a comment_count key and no body key", () => {
+    test("GET 200: Responds with an array of article objects, with a comment_count key and no body key", () => {
       return request(app)
         .get("/api/articles")
         .expect(200)
         .then(({ body: { articles } }) => {
           expect(articles.length).toBe(13);
           expect(articles[0].comment_count).toBe(2);
-          expect(articles).toBeSortedBy("created_at", { descending: true });
           articles.forEach((article) => {
             expect(typeof article.author).toBe("string");
             expect(typeof article.title).toBe("string");
@@ -107,6 +106,14 @@ describe("/api/articles", () => {
             expect(typeof article.comment_count).toBe("number");
             expect(article.body).toBe(undefined);
           });
+        });
+    });
+    test("GET 200: Array has default sorting of desc by date(created_at)", () => {
+      return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+          expect(articles).toBeSortedBy("created_at", { descending: true });
         });
     });
   });
