@@ -6,7 +6,7 @@ const {
   getArticles,
 } = require("./controllers/articles-controller");
 const { customErrors, psqlErrors, serverError } = require('./error-handling');
-const { getComments } = require("./controllers/comments-controller");
+const { getComments, postComments } = require("./controllers/comments-controller");
 
 const app = express();
 
@@ -20,7 +20,9 @@ app.get("/api/articles", getArticles);
 
 app.get("/api/articles/:article_id", getArticleById);
 
-app.get('/api/articles/:article_id/comments',getComments)
+app.get('/api/articles/:article_id/comments', getComments)
+
+app.post('/api/articles/:article_id/comments',postComments)
 
 app.all("/*", (req, res, next) => next({ status: 404, msg: "Path not found" }));
 
