@@ -32,3 +32,4 @@ exports.patchArticle = (req, res, next) => {
     })
     .catch(next);
 };
+
