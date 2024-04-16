@@ -177,6 +177,31 @@ describe("/api/articles", () => {
           expect(articles).toBeSortedBy("created_at", { descending: true });
         });
     });
+    test('GET 200: Accepts query of topic and filters by given topic', () => {
+      return request(app)
+        .get('/api/articles?topic=cats')
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles).toHaveLength(1)
+          expect(articles[0].topic).toBe('cats')
+      })
+    })
+    test('GET 200: Responds with an empty array if no articles are associated with given topic', () => {
+      return request(app)
+        .get('/api/articles?topic=paper')
+        .expect(200)
+        .then(({ body: { articles } }) => {
+        expect(articles).toHaveLength(0)
+      })
+    })
+    test('GET 404: Returns not found if topic does not exist', () => {
+      return request(app)
+        .get('/api/articles?topic=not_a_topic')
+        .expect(404)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Topic not found')
+      })
+    })
   });
 });
 describe("/api/articles/:article_id/comments", () => {
