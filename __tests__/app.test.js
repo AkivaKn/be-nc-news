@@ -71,6 +71,14 @@ describe("/api/articles/:article_id", () => {
           expect(article).toMatchObject(expected);
         });
     });
+    test('GET 200: Response object includes a comment_count key', () => {
+      return request(app)
+        .get('/api/articles/1')
+        .expect(200)
+        .then(({ body: { article } }) => {
+        expect(article.comment_count).toBe(11)
+      })
+    })
     test("GET 404: Responds with article not found when passed an article_id with no corresponding article", () => {
       return request(app)
         .get("/api/articles/100")
