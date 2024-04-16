@@ -7,7 +7,7 @@ const {
   patchArticle,
 } = require("./controllers/articles-controller");
 const { customErrors, psqlErrors, serverError } = require('./error-handling');
-const { getComments, postComment } = require("./controllers/comments-controller");
+const { getComments, postComment, deleteComment } = require("./controllers/comments-controller");
 
 const app = express();
 
@@ -25,7 +25,9 @@ app.get('/api/articles/:article_id/comments', getComments)
 
 app.post('/api/articles/:article_id/comments', postComment)
 
-app.patch('/api/articles/:article_id',patchArticle)
+app.patch('/api/articles/:article_id', patchArticle)
+
+app.delete('/api/comments/:comment_id',deleteComment)
 
 app.all("/*", (req, res, next) => next({ status: 404, msg: "Path not found" }));
 

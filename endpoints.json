@@ -106,5 +106,8 @@
         "created_at": "2024-04-15T15:45:15.859Z"
       }
     }
+  },
+  "DELETE /api/comments/:comment_id": {
+    "description": "deletes specified comment and responds with status 204 and no content"
   }
 }
