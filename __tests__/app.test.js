@@ -53,20 +53,22 @@ describe("/api", () => {
 describe("/api/articles/:article_id", () => {
   describe("GET", () => {
     test("GET 200: Responds with an article object with the correct keys", () => {
-      return request(app)
+        const expected = {
+            author: "butter_bridge",
+            title: "Living in the shadow of a great man",
+            article_id: 1,
+            body: "I find this existence challenging",
+            topic: 'mitch',
+            created_at: "2020-07-09T20:11:00.000Z",
+            votes: 100,
+            article_img_url: 
+        "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+        }
+        return request(app)
         .get("/api/articles/1")
         .expect(200)
         .then(({ body: { article } }) => {
-          expect(article.author).toBe("butter_bridge");
-          expect(article.title).toBe("Living in the shadow of a great man");
-          expect(article.article_id).toBe(1);
-          expect(article.body).toBe("I find this existence challenging");
-          expect(article.topic).toBe("mitch");
-          expect(article.created_at).toBe("2020-07-09T20:11:00.000Z");
-          expect(article.votes).toBe(100);
-          expect(article.article_img_url).toBe(
-            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
-          );
+          expect(article).toMatchObject(expected)
         });
     });
     test("GET 404: Responds with article not found when passed an article_id with no corresponding article", () => {
@@ -85,7 +87,65 @@ describe("/api/articles/:article_id", () => {
           expect(msg).toBe("Bad request");
         });
     });
-  });
+  })
+    describe('PATCH', () => {
+        test('PATCH 200: Responds with updated object when passed an object with votes in the correct syntax', () => {
+            const expected = {
+                author: "butter_bridge",
+                title: "Living in the shadow of a great man",
+                article_id: 1,
+                body: "I find this existence challenging",
+                topic: 'mitch',
+                created_at: "2020-07-09T20:11:00.000Z",
+                votes: 110,
+                article_img_url: 
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+            }
+            return request(app)
+                .patch('/api/articles/1')
+                .send({ inc_votes: 10 })
+                .expect(200)
+                .then(({ body: { article } }) => {
+                expect(article).toMatchObject(expected)
+            })
+        })
+        test('PATCH 400: Responds with bad request when passed an object with no inc_votes key', () => {
+            return request(app)
+            .patch('/api/articles/1')
+                .send({ votes: 10 })
+                .expect(400)
+                .then(({ body: {msg } }) => {
+                expect(msg).toBe('Bad request')
+            })
+        })
+        test('PATCH 400: Responds with bad request when passed a value of inc_votes which is not a number', () => {
+            return request(app)
+            .patch('/api/articles/1')
+                .send({ inc_votes: 'not a number' })
+                .expect(400)
+                .then(({ body: {msg } }) => {
+                expect(msg).toBe('Bad request')
+            })
+        })
+        test('PATCH 400: Responds with bad request when passed an article_id which is not a number', () => {
+            return request(app)
+            .patch('/api/articles/first_article')
+                .send({ inc_votes: 10 })
+                .expect(400)
+                .then(({ body: {msg } }) => {
+                expect(msg).toBe('Bad request')
+            })
+        })
+        test('PATCH 404: Responds with not found when passed an article_id which does not exist', () => {
+            return request(app)
+            .patch('/api/articles/100')
+                .send({ inc_votes: 5 })
+                .expect(404)
+                .then(({ body: {msg } }) => {
+                expect(msg).toBe('Article not found')
+            })
+        })
+    })
 });
 describe("/api/articles", () => {
   describe("GET", () => {
