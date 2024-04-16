@@ -6,8 +6,13 @@ const {
   getArticles,
   patchArticle,
 } = require("./controllers/articles-controller");
-const { customErrors, psqlErrors, serverError } = require('./error-handling');
-const { getComments, postComment, deleteComment } = require("./controllers/comments-controller");
+const { customErrors, psqlErrors, serverError } = require("./error-handling");
+const {
+  getComments,
+  postComment,
+  deleteComment,
+} = require("./controllers/comments-controller");
+const { getUsers } = require("./controllers/users-controller");
 
 const app = express();
 
@@ -21,20 +26,22 @@ app.get("/api/articles", getArticles);
 
 app.get("/api/articles/:article_id", getArticleById);
 
-app.get('/api/articles/:article_id/comments', getComments)
+app.get("/api/articles/:article_id/comments", getComments);
 
-app.post('/api/articles/:article_id/comments', postComment)
+app.get("/api/users", getUsers);
 
-app.patch('/api/articles/:article_id', patchArticle)
+app.post("/api/articles/:article_id/comments", postComment);
 
-app.delete('/api/comments/:comment_id',deleteComment)
+app.patch("/api/articles/:article_id", patchArticle);
+
+app.delete("/api/comments/:comment_id", deleteComment);
 
 app.all("/*", (req, res, next) => next({ status: 404, msg: "Path not found" }));
 
-app.use(customErrors)
+app.use(customErrors);
 
-app.use(psqlErrors)
+app.use(psqlErrors);
 
-app.use(serverError)
+app.use(serverError);
 
 module.exports = app;
