@@ -161,14 +161,14 @@ describe("/api/articles/:article_id/comments", () => {
           expect(msg).toBe("Article not found");
         });
     });
-      test('GET 400: Returns bad request if article_id is not an integer', () => {
-        return request(app)
+    test("GET 400: Returns bad request if article_id is not an integer", () => {
+      return request(app)
         .get("/api/articles/not-a-number/comments")
         .expect(400)
         .then(({ body: { msg } }) => {
           expect(msg).toBe("Bad request");
         });
-      })
+    });
   });
   describe("POST", () => {
     test("POST 201: Returns newly created comment", () => {
@@ -176,17 +176,20 @@ describe("/api/articles/:article_id/comments", () => {
         username: "lurker",
         body: "This is an example comment",
       };
+      const expected = {
+        body: "This is an example comment",
+        author: "lurker",
+        comment_id: expect.any(Number),
+        votes: 0,
+        created_at: expect.any(String),
+        article_id: 2,
+      };
       return request(app)
         .post("/api/articles/2/comments")
         .send(newComment)
         .expect(201)
         .then(({ body: { comment } }) => {
-          expect(comment.body).toBe(newComment.body);
-          expect(comment.author).toBe(newComment.username);
-          expect(comment.comment_id).toBeNumber();
-          expect(comment.votes).toBe(0);
-          expect(comment.created_at).toBeString();
-          expect(comment.article_id).toBe(2);
+          expect(comment).toMatchObject(expected);
         });
     });
     test("POST 404: Returns article not found if article_id does not exist", () => {
@@ -227,5 +230,31 @@ describe("/api/articles/:article_id/comments", () => {
           expect(msg).toBe("Bad request");
         });
     });
+    test("POST 400: Returns bad request when passed a new comment with a body that is an empty string", () => {
+      const newComment = {
+        username: "lurker",
+        body: '',
+      };
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send(newComment)
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test("POST 400: Returns bad request when passed a new comment with a username which doesn't exist", () => {
+        const newComment = {
+          username: "not a username",
+          body: 'I am a comment',
+        };
+        return request(app)
+          .post("/api/articles/1/comments")
+          .send(newComment)
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("Bad request");
+          });
+      });
   });
 });
