@@ -19,7 +19,17 @@ exports.selectArticleById = (article_id) => {
     });
 };
 
-exports.selectArticles = (topic) => {
+exports.selectArticles = (topic, sort_by = 'created_at',order = 'desc') => {
+  const validSortBy = ['author', 'title',' article_id', 'topic', 'created_at', 'votes', 'article_img_url', 'comment_count'];
+  if (!validSortBy.includes(sort_by)) {
+    return Promise.reject({status:400,msg:'Bad request'})
+  }
+
+  const validOrder = ['desc', 'asc']
+  if (!validOrder.includes(order.toLowerCase())) {
+    return Promise.reject({status:400,msg:'Bad request'})
+  }
+
   let sqlStr = `SELECT articles.author,title,articles.article_id,topic,articles.created_at,articles.votes,article_img_url, COUNT(comment_id) AS comment_count 
   FROM articles 
   LEFT JOIN comments 
@@ -32,7 +42,7 @@ exports.selectArticles = (topic) => {
     queryVals.push(topic);
   }
   sqlStr += ` GROUP BY
-  articles.article_id ORDER BY articles.created_at DESC;`;
+  articles.article_id ORDER BY articles.${sort_by} ${order};`;
   return db.query(sqlStr, queryVals).then(({ rows }) => {
     rows.forEach((article) => {
       article.comment_count = Number(article.comment_count);
