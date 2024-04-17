@@ -422,3 +422,25 @@ describe('/api/users', () => {
     })
   })
 })
+describe('/api/users/:username', () => {
+  describe('GET', () => {
+    test('GET 200: Responds with requested username object', () => {
+      return request(app)
+        .get('/api/users/icellusedkars')
+        .expect(200)
+        .then(({ body: { user } }) => {
+          expect(user.username).toBe('icellusedkars')
+          expect(user.name).toBe('sam')
+          expect(user.avatar_url).toBe('https://avatars2.githubusercontent.com/u/24604688?s=460&v=4')
+      })
+    })
+    test('GET 404: Responds with an appropriate error message if no such user exist', () => {
+      return request(app)
+        .get('/api/users/not_a_user')
+        .expect(404)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('User not found')
+      })
+    })
+  })
+})
