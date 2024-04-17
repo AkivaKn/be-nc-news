@@ -202,12 +202,43 @@ describe("/api/articles", () => {
         expect(articles).toHaveLength(0)
       })
     })
+    test('GET 200: Accepts query of sort_by for any valid column', () => {
+      return request(app)
+        .get('/api/articles?sort_by=author')
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles).toBeSortedBy("author", { descending: true });
+        });
+    })
+    test('GET 200: Accepts query of order and sorts accordingly', () => {
+      return request(app)
+        .get('/api/articles?sort_by=author&&order=asc')
+        .then(({ body: { articles } }) => {
+          expect(articles).toBeSortedBy("author");
+        });
+    })
     test('GET 404: Returns not found if topic does not exist', () => {
       return request(app)
         .get('/api/articles?topic=not_a_topic')
         .expect(404)
         .then(({ body: { msg } }) => {
         expect(msg).toBe('Topic not found')
+      })
+    })
+    test('GET 400: Returns bad request if sort_by is not a valid column', () => {
+      return request(app)
+        .get('/api/articles?sort_by=not_a_column')
+        .expect(400)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Bad request')
+      })
+    })
+    test('GET 400: Returns bad request if order is not asc or desc', () => {
+      return request(app)
+        .get('/api/articles?order=incorrect')
+        .expect(400)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Bad request')
       })
     })
   });
