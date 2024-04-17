@@ -404,6 +404,60 @@ describe("/api/commments/:comment_id", () => {
       })
     })
   });
+  describe('PATCH', () => {
+    test('PATCH 200: Responds with updated user', () => {
+      const expected = {
+        body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+        votes: 19,
+        author: "butter_bridge",
+        article_id: 9,
+        created_at: "2020-04-06T12:17:00.000Z",
+      }
+      return request(app)
+        .patch('/api/comments/1')
+        .send({ inc_votes: 3 })
+        .expect(200)
+        .then(({ body: { comment } }) => {
+        expect(comment).toMatchObject(expected)
+      })
+    })
+    test('PATCH 400: Responds with bad request when sent object does not include an inc_votes key', () => {
+      return request(app)
+        .patch('/api/comments/1')
+        .send({ votes: 3 })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Bad request')
+      })
+    })
+    test('PATCH 400: Responds with bad request when sent object include an inc_votes key which is not a number', () => {
+      return request(app)
+        .patch('/api/comments/1')
+        .send({ inc_votes: 'not_a_number' })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Bad request')
+      })
+    })
+    test('PATCH 400: Responds with bad request when comment_id is not an integer', () => {
+      return request(app)
+        .patch('/api/comments/not_a_number')
+        .send({ inc_votes: 3 })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Bad request')
+      })
+    })
+    test('PATCH 404: Responds with not found when no such comment exists', () => {
+      return request(app)
+        .patch('/api/comments/100')
+        .send({ inc_votes: 3 })
+        .expect(404)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Comment not found')
+      })
+    })
+  })
 });
 describe('/api/users', () => {
   describe('GET', () => {
