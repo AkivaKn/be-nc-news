@@ -71,14 +71,14 @@ describe("/api/articles/:article_id", () => {
           expect(article).toMatchObject(expected);
         });
     });
-    test('GET 200: Response object includes a comment_count key', () => {
+    test("GET 200: Response object includes a comment_count key", () => {
       return request(app)
-        .get('/api/articles/1')
+        .get("/api/articles/1")
         .expect(200)
         .then(({ body: { article } }) => {
-        expect(article.comment_count).toBe(11)
-      })
-    })
+          expect(article.comment_count).toBe(11);
+        });
+    });
     test("GET 404: Responds with article not found when passed an article_id with no corresponding article", () => {
       return request(app)
         .get("/api/articles/100")
@@ -185,57 +185,157 @@ describe("/api/articles", () => {
           expect(articles).toBeSortedBy("created_at", { descending: true });
         });
     });
-    test('GET 200: Accepts query of topic and filters by given topic', () => {
+    test("GET 200: Accepts query of topic and filters by given topic", () => {
       return request(app)
-        .get('/api/articles?topic=cats')
+        .get("/api/articles?topic=cats")
         .expect(200)
         .then(({ body: { articles } }) => {
-          expect(articles).toHaveLength(1)
-          expect(articles[0].topic).toBe('cats')
-      })
-    })
-    test('GET 200: Responds with an empty array if no articles are associated with given topic', () => {
+          expect(articles).toHaveLength(1);
+          expect(articles[0].topic).toBe("cats");
+        });
+    });
+    test("GET 200: Responds with an empty array if no articles are associated with given topic", () => {
       return request(app)
-        .get('/api/articles?topic=paper')
+        .get("/api/articles?topic=paper")
         .expect(200)
         .then(({ body: { articles } }) => {
-        expect(articles).toHaveLength(0)
-      })
-    })
-    test('GET 200: Accepts query of sort_by for any valid column', () => {
+          expect(articles).toHaveLength(0);
+        });
+    });
+    test("GET 200: Accepts query of sort_by for any valid column", () => {
       return request(app)
-        .get('/api/articles?sort_by=author')
+        .get("/api/articles?sort_by=author")
         .expect(200)
         .then(({ body: { articles } }) => {
           expect(articles).toBeSortedBy("author", { descending: true });
         });
-    })
-    test('GET 200: Accepts query of order and sorts accordingly', () => {
+    });
+    test("GET 200: Accepts query of order and sorts accordingly", () => {
       return request(app)
-        .get('/api/articles?sort_by=author&&order=asc')
+        .get("/api/articles?sort_by=author&&order=asc")
         .then(({ body: { articles } }) => {
           expect(articles).toBeSortedBy("author");
         });
-    })
-    test('GET 404: Returns not found if topic does not exist', () => {
+    });
+    test("GET 404: Returns not found if topic does not exist", () => {
       return request(app)
-        .get('/api/articles?topic=not_a_topic')
+        .get("/api/articles?topic=not_a_topic")
         .expect(404)
         .then(({ body: { msg } }) => {
-        expect(msg).toBe('Topic not found')
-      })
-    })
-    test('GET 400: Returns bad request if sort_by is not a valid column', () => {
+          expect(msg).toBe("Topic not found");
+        });
+    });
+    test("GET 400: Returns bad request if sort_by is not a valid column", () => {
       return request(app)
-        .get('/api/articles?sort_by=not_a_column')
+        .get("/api/articles?sort_by=not_a_column")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test("GET 400: Returns bad request if order is not asc or desc", () => {
+      return request(app)
+        .get("/api/articles?order=incorrect")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+  });
+  describe("POST", () => {
+    test("POST 201: Responds with the newly created article", () => {
+      const newArticle = {
+        title: "Sony Vaio; or, The Laptop",
+        topic: "mitch",
+        author: "icellusedkars",
+        body: "Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me.",
+        article_img_url:
+          "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+      };
+      const expected = {
+        title: "Sony Vaio; or, The Laptop",
+        topic: "mitch",
+        author: "icellusedkars",
+        body: "Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me.",
+        article_img_url:
+          "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        article_id: expect.any(Number),
+        votes: 0,
+        created_at: expect.any(String),
+        comment_count: 0,
+      };
+      return request(app)
+        .post("/api/articles")
+        .send(newArticle)
+        .expect(201)
+        .then(({ body: { article } }) => {
+          expect(article).toMatchObject(expected);
+        });
+    })
+    test('POST 201: Responds with newly created article with default article_img_url', () => {
+      const newArticle = {
+        title: "Sony Vaio; or, The Laptop",
+        topic: "mitch",
+        author: "icellusedkars",
+        body: "Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me."
+      };
+      const expected = {
+        title: "Sony Vaio; or, The Laptop",
+        topic: "mitch",
+        author: "icellusedkars",
+        body: "Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me.",
+        article_img_url: expect.any(String),
+        article_id: expect.any(Number),
+        votes: 0,
+        created_at: expect.any(String),
+        comment_count: 0
+      };
+    })
+    test('POST 400: Returns bad request when passed incomplete data', () => {
+      const newArticle = {
+        title: "Sony Vaio; or, The Laptop",
+        topic: "mitch",
+        body: "Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me.",
+        article_img_url:
+          "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+      }
+      return request(app)
+        .post('/api/articles')
+        .send(newArticle)
         .expect(400)
         .then(({ body: { msg } }) => {
         expect(msg).toBe('Bad request')
       })
     })
-    test('GET 400: Returns bad request if order is not asc or desc', () => {
+    test('POST 400: Returns bad request when passed with a topic that is not in database', () => {
+      const newArticle = {
+        title: "Sony Vaio; or, The Laptop",
+        topic: "not_a_topic",
+        author: "icellusedkars",
+        body: "Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me.",
+        article_img_url:
+          "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+      }
       return request(app)
-        .get('/api/articles?order=incorrect')
+        .post('/api/articles')
+        .send(newArticle)
+        .expect(400)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Bad request')
+      })
+    })
+    test('POST 400: Returns bad request when passed with an author that is not in database', () => {
+      const newArticle = {
+        title: "Sony Vaio; or, The Laptop",
+        topic: "mitch",
+        author: "not_an_author",
+        body: "Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me.",
+        article_img_url:
+          "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+      }
+      return request(app)
+        .post('/api/articles')
+        .send(newArticle)
         .expect(400)
         .then(({ body: { msg } }) => {
         expect(msg).toBe('Bad request')
@@ -387,114 +487,116 @@ describe("/api/commments/:comment_id", () => {
     test("DELETE 204: Returns a status 204 when passed a comment_id to delete", () => {
       return request(app).delete("/api/comments/1").expect(204);
     });
-    test('DELETE 404: Returns not found when comment does not exist', () => {
+    test("DELETE 404: Returns not found when comment does not exist", () => {
       return request(app)
         .delete("/api/comments/100")
         .expect(404)
         .then(({ body: { msg } }) => {
-        expect(msg).toBe('Comment not found')
-      })
-    })
-    test('DELETE 400: Returns bad request when comment_id is not a number', () => {
+          expect(msg).toBe("Comment not found");
+        });
+    });
+    test("DELETE 400: Returns bad request when comment_id is not a number", () => {
       return request(app)
         .delete("/api/comments/not_a_number")
         .expect(400)
         .then(({ body: { msg } }) => {
-        expect(msg).toBe('Bad request')
-      })
-    })
+          expect(msg).toBe("Bad request");
+        });
+    });
   });
-  describe('PATCH', () => {
-    test('PATCH 200: Responds with updated user', () => {
+  describe("PATCH", () => {
+    test("PATCH 200: Responds with updated user", () => {
       const expected = {
         body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
         votes: 19,
         author: "butter_bridge",
         article_id: 9,
         created_at: "2020-04-06T12:17:00.000Z",
-      }
+      };
       return request(app)
-        .patch('/api/comments/1')
+        .patch("/api/comments/1")
         .send({ inc_votes: 3 })
         .expect(200)
         .then(({ body: { comment } }) => {
-        expect(comment).toMatchObject(expected)
-      })
-    })
-    test('PATCH 400: Responds with bad request when sent object does not include an inc_votes key', () => {
+          expect(comment).toMatchObject(expected);
+        });
+    });
+    test("PATCH 400: Responds with bad request when sent object does not include an inc_votes key", () => {
       return request(app)
-        .patch('/api/comments/1')
+        .patch("/api/comments/1")
         .send({ votes: 3 })
         .expect(400)
         .then(({ body: { msg } }) => {
-        expect(msg).toBe('Bad request')
-      })
-    })
-    test('PATCH 400: Responds with bad request when sent object include an inc_votes key which is not a number', () => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test("PATCH 400: Responds with bad request when sent object include an inc_votes key which is not a number", () => {
       return request(app)
-        .patch('/api/comments/1')
-        .send({ inc_votes: 'not_a_number' })
+        .patch("/api/comments/1")
+        .send({ inc_votes: "not_a_number" })
         .expect(400)
         .then(({ body: { msg } }) => {
-        expect(msg).toBe('Bad request')
-      })
-    })
-    test('PATCH 400: Responds with bad request when comment_id is not an integer', () => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test("PATCH 400: Responds with bad request when comment_id is not an integer", () => {
       return request(app)
-        .patch('/api/comments/not_a_number')
+        .patch("/api/comments/not_a_number")
         .send({ inc_votes: 3 })
         .expect(400)
         .then(({ body: { msg } }) => {
-        expect(msg).toBe('Bad request')
-      })
-    })
-    test('PATCH 404: Responds with not found when no such comment exists', () => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test("PATCH 404: Responds with not found when no such comment exists", () => {
       return request(app)
-        .patch('/api/comments/100')
+        .patch("/api/comments/100")
         .send({ inc_votes: 3 })
         .expect(404)
         .then(({ body: { msg } }) => {
-        expect(msg).toBe('Comment not found')
-      })
-    })
-  })
+          expect(msg).toBe("Comment not found");
+        });
+    });
+  });
 });
-describe('/api/users', () => {
-  describe('GET', () => {
-    test('GET 200: Returns an array of users', () => {
+describe("/api/users", () => {
+  describe("GET", () => {
+    test("GET 200: Returns an array of users", () => {
       return request(app)
-        .get('/api/users')
+        .get("/api/users")
         .expect(200)
         .then(({ body: { users } }) => {
           expect(users).toHaveLength(4);
           users.forEach((user) => {
-            expect(typeof user.username).toBe('string')
-            expect(typeof user.name).toBe('string')
-            expect(typeof user.avatar_url).toBe('string')
-          })
-      })
-    })
-  })
-})
-describe('/api/users/:username', () => {
-  describe('GET', () => {
-    test('GET 200: Responds with requested username object', () => {
+            expect(typeof user.username).toBe("string");
+            expect(typeof user.name).toBe("string");
+            expect(typeof user.avatar_url).toBe("string");
+          });
+        });
+    });
+  });
+});
+describe("/api/users/:username", () => {
+  describe("GET", () => {
+    test("GET 200: Responds with requested username object", () => {
       return request(app)
-        .get('/api/users/icellusedkars')
+        .get("/api/users/icellusedkars")
         .expect(200)
         .then(({ body: { user } }) => {
-          expect(user.username).toBe('icellusedkars')
-          expect(user.name).toBe('sam')
-          expect(user.avatar_url).toBe('https://avatars2.githubusercontent.com/u/24604688?s=460&v=4')
-      })
-    })
-    test('GET 404: Responds with an appropriate error message if no such user exist', () => {
+          expect(user.username).toBe("icellusedkars");
+          expect(user.name).toBe("sam");
+          expect(user.avatar_url).toBe(
+            "https://avatars2.githubusercontent.com/u/24604688?s=460&v=4"
+          );
+        });
+    });
+    test("GET 404: Responds with an appropriate error message if no such user exist", () => {
       return request(app)
-        .get('/api/users/not_a_user')
+        .get("/api/users/not_a_user")
         .expect(404)
         .then(({ body: { msg } }) => {
-        expect(msg).toBe('User not found')
-      })
-    })
-  })
-})
+          expect(msg).toBe("User not found");
+        });
+    });
+  });
+});

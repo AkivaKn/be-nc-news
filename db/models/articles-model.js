@@ -71,3 +71,11 @@ exports.checkArticleExists = (article_id) => {
     }
   })
 }
+
+exports.insertArticle = (newArticle) => {
+  const {author,title,body,topic,article_img_url} = newArticle
+  return db.query(`INSERT INTO articles (author,title,body,topic,article_img_url) VALUES ($1,$2,$3,$4,$5) RETURNING article_id;`, [author, title, body, topic, article_img_url])
+    .then(({ rows })=>
+      {return this.selectArticleById(rows[0].article_id)}
+    )
+}
