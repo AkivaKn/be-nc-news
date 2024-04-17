@@ -2,7 +2,7 @@ const db = require("../connection");
 
 exports.selectArticleById = (article_id) => {
   return db
-    .query(`SELECT articles.author,title,articles.article_id,articles.body,topic,articles.created_at,articles.votes,article_img_url, COUNT(comment_id) AS comment_count 
+    .query(`SELECT articles.author,title,articles.article_id,articles.body,topic,articles.created_at,articles.votes,article_img_url, COUNT(comment_id)::INT AS comment_count 
     FROM articles 
     LEFT JOIN comments 
     ON articles.article_id = comments.article_id 
@@ -14,7 +14,6 @@ exports.selectArticleById = (article_id) => {
       if (rows.length === 0) {
         return Promise.reject({ status: 404, msg: "Article not found" });
       }
-        rows[0].comment_count = Number(rows[0].comment_count);
       return rows[0];
     });
 };
@@ -30,7 +29,7 @@ exports.selectArticles = (topic, sort_by = 'created_at',order = 'desc') => {
     return Promise.reject({status:400,msg:'Bad request'})
   }
 
-  let sqlStr = `SELECT articles.author,title,articles.article_id,topic,articles.created_at,articles.votes,article_img_url, COUNT(comment_id) AS comment_count 
+  let sqlStr = `SELECT articles.author,title,articles.article_id,topic,articles.created_at,articles.votes,article_img_url, COUNT(comment_id)::INT AS comment_count 
   FROM articles 
   LEFT JOIN comments 
   ON articles.article_id = comments.article_id 
@@ -44,9 +43,6 @@ exports.selectArticles = (topic, sort_by = 'created_at',order = 'desc') => {
   sqlStr += ` GROUP BY
   articles.article_id ORDER BY articles.${sort_by} ${order};`;
   return db.query(sqlStr, queryVals).then(({ rows }) => {
-    rows.forEach((article) => {
-      article.comment_count = Number(article.comment_count);
-    });
     return rows;
   });
 };
