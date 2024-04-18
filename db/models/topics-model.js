@@ -19,3 +19,10 @@ exports.checkTopicExists = (topic) => {
        return Promise.resolve()
   }
 };
+
+exports.insertTopic = (newTopic) => {
+  return db.query(`INSERT INTO topics (slug,description) VALUES ($1,$2) RETURNING *;`, [newTopic.slug, newTopic.description])
+    .then(({ rows }) => {
+    return rows[0]
+  })
+}

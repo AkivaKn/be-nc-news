@@ -39,6 +39,33 @@ describe("/api/topics", () => {
         });
     });
   });
+  describe('POST', () => {
+    test('POST 201: Responds with newly posted topic', () => {
+      const newTopic = {
+        "slug": "example_name",
+        "description": "example description"
+      }
+      return request(app)
+        .post('/api/topics')
+        .send(newTopic)
+        .expect(201)
+        .then(({ body: { topic } }) => {
+        expect(topic).toMatchObject(newTopic)
+      })
+    })
+    test('POST 400: Returns bad request when passed incomplete data', () => {
+      const newTopic = {
+        "description": "example description"
+      }
+      return request(app)
+        .post('/api/topics')
+        .send(newTopic)
+        .expect(400)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Bad request')
+      })
+    })
+  })
 });
 describe("/api", () => {
   test("GET 200: Responds with enpoints.json file", () => {

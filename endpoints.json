@@ -4,9 +4,15 @@
   },
   "GET /api/topics": {
     "description": "serves an array of all topics",
-    "queries": [],
     "exampleResponse": {
       "topics": [{ "slug": "football", "description": "Footie!" }]
+    }
+  },
+  "POST /api/topics": {
+    "description": "accepts a topic object and returns posted object",
+    "exampleRequest": { "slug": "football", "description": "Footie!" },
+    "exampleResponse": {
+      "topic": [{ "slug": "football", "description": "Footie!" }]
     }
   },
   "GET /api/articles": {
