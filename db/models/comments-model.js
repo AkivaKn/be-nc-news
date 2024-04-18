@@ -1,20 +1,29 @@
 const db = require("../connection");
 
-exports.selectComments = (article_id, limit = 10,p=1) => {
+exports.selectComments = (username, article_id, limit = 10, p = 1) => {
   if (!Number(limit)) {
     return Promise.reject({ status: 400, msg: "Bad request" });
   }
   if (!Number(p)) {
-    return Promise.reject({status:400,msg:'Bad request'})
+    return Promise.reject({ status: 400, msg: "Bad request" });
   }
-  return db
-    .query(
-      `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC LIMIT ${limit} OFFSET ${(p-1)*limit};`,
-      [article_id]
-    )
-    .then(({ rows }) => {
-      return rows;
-    });
+  let sqlStr = `SELECT * FROM comments `;
+  const queryVals = [];
+
+  if (username) {
+    sqlStr += `WHERE author=$1 `;
+    queryVals.push(username);
+  } else if (article_id) {
+    sqlStr += `WHERE article_id=$1 `;
+    queryVals.push(article_id);
+  }
+
+  sqlStr += `ORDER BY created_at DESC LIMIT ${limit} OFFSET ${
+    (p - 1) * limit
+  };`;
+  return db.query(sqlStr, queryVals).then(({ rows }) => {
+    return rows;
+  });
 };
 
 exports.insertComment = (article_id, username, body) => {

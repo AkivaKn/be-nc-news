@@ -7,7 +7,7 @@ exports.selectTopics = () => {
 };
 
 exports.checkTopicExists = (topic) => {
-    if (topic !== undefined) {
+    if (topic) {
         return db
           .query(`SELECT * FROM topics WHERE slug = $1;`, [topic])
           .then(({ rows }) => {

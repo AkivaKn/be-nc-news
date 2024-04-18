@@ -770,3 +770,85 @@ describe("/api/users/:username", () => {
     });
   });
 });
+describe('/api/users/:username/comments', () => {
+  describe("GET", () => {
+    test("GET 200: Responds with an array of comments with the correct keys", () => {
+      return request(app)
+        .get("/api/users/icellusedkars/comments")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments.length).toBeGreaterThan(0);
+          comments.forEach((comment) => {
+            expect(typeof comment.comment_id).toBe("number");
+            expect(typeof comment.votes).toBe("number");
+            expect(typeof comment.created_at).toBe("string");
+            expect(comment.author).toBe("icellusedkars");
+            expect(typeof comment.body).toBe("string");
+            expect(typeof comment.article_id).toBe('number');
+          });
+        });
+    });
+    test("GET 200: Response is sorted by default by date descending", () => {
+      return request(app)
+        .get("/api/users/icellusedkars/comments")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments).toBeSortedBy("created_at", { descending: true });
+        });
+    });
+    test("GET 200: Responds with an empty array if requested a user that exists but has no comments", () => {
+      return request(app)
+        .get("/api/users/lurker/comments")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments.length).toBe(0);
+        });
+    });
+    test("GET 200: Accepts a limit query and responds accordingly", () => {
+      return request(app)
+        .get("/api/users/icellusedkars/comments?limit=2")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments).toHaveLength(2);
+        });
+    });
+    test("GET 200: Response has default pagination of 10", () => {
+      return request(app)
+        .get("/api/users/icellusedkars/comments")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments).toHaveLength(10);
+        });
+    });
+    test("GET 200: Accepts a p(page) query and responds accordingly", () => {
+      return request(app)
+        .get("/api/users/icellusedkars/comments?limit=2&&p=2")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments[0].comment_id).toBe(10);
+        });
+    });
+    test("GET 400: Returns bad request when limit provided is not a number", () => {
+      return request(app)
+        .get("/api/users/icellusedkars/comments?limit=45;SELECT * FROM articles;")
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test("GET 400: Returns bad request when page provided is not a number", () => {
+      return request(app)
+        .get("/api/users/icellusedkars/comments?p=5;SELECT * FROM articles;")
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test("GET 404: Returns username not found if no such article exists", () => {
+      return request(app)
+        .get("/api/users/not_a_user/comments")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Username not found");
+        });
+    });
+  });
+})
