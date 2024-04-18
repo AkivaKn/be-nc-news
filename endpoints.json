@@ -20,7 +20,7 @@
   },
   "GET /api/articles": {
     "description": "serves an array of all articles",
-    "queries": ["topic", "sort_by,order","limit","p"],
+    "queries": ["topic", "sort_by,order", "limit", "p"],
     "exampleResponse": {
       "articles": [
         {
@@ -107,7 +107,7 @@
   },
   "GET /api/articles/:article_id/comments": {
     "description": "serves an array of comments related to the specified article",
-    "queries": ["limit","p"],
+    "queries": ["limit", "p","sort_by","order"],
     "exampleResponse": {
       "comments": [
         {
@@ -148,7 +148,7 @@
   },
   "GET /api/users/:username/comments": {
     "description": "serves an array of comments related to the specified username",
-    "queries": ["limit","p"],
+    "queries": ["limit", "p","sort_by","order"],
     "exampleResponse": {
       "comments": [
         {
@@ -172,7 +172,7 @@
   },
   "GET /api/comments": {
     "description": "serves an array of users",
-    "queries": ["limit","p","sort_by","order"],
+    "queries": ["limit", "p", "sort_by", "order"],
     "exampleResponse": {
       "comments": [
         {
@@ -218,12 +218,14 @@
         {
           "username": "icellusedkars",
           "name": "sam",
-          "avatar_url": "https://avatars2.githubusercontent.com/u/24604688?s=460&v=4"
+          "avatar_url": "https://avatars2.githubusercontent.com/u/24604688?s=460&v=4",
+          "comment_count": 13
         },
         {
           "username": "rogersop",
           "name": "paul",
-          "avatar_url": "https://avatars2.githubusercontent.com/u/24394918?s=400&v=4"
+          "avatar_url": "https://avatars2.githubusercontent.com/u/24394918?s=400&v=4",
+          "comment_count": 0
         }
       ]
     }
@@ -234,7 +236,8 @@
       "user": {
         "username": "rogersop",
         "name": "paul",
-        "avatar_url": "https://avatars2.githubusercontent.com/u/24394918?s=400&v=4"
+        "avatar_url": "https://avatars2.githubusercontent.com/u/24394918?s=400&v=4",
+        "comment_count": 1
       }
     }
   },
