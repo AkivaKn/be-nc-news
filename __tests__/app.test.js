@@ -872,6 +872,17 @@ describe("/api/users", () => {
           });
         });
     });
+    test('GET 200: Response has comment_count key corresponding to the amount of comments associated with users', () => {
+      return request(app)
+        .get('/api/users')
+        .expect(200)
+        .then(({ body: { users } }) => {
+          expect(users[3].comment_count).toBe(5)
+          users.forEach((user) => {
+            expect(typeof user.comment_count).toBe('number')
+          })
+      })
+    })
   });
 });
 describe("/api/users/:username", () => {
@@ -888,6 +899,14 @@ describe("/api/users/:username", () => {
           );
         });
     });
+    test('GET 200: Response has comment_count key corresponding to the amount of comments associated with that user', () => {
+      return request(app)
+        .get('/api/users/icellusedkars')
+        .expect(200)
+        .then(({ body: { user } }) => {
+        expect(user.comment_count).toBe(13)
+      })
+    })
     test("GET 404: Responds with an appropriate error message if no such user exist", () => {
       return request(app)
         .get("/api/users/not_a_user")
@@ -903,13 +922,13 @@ describe("/api/users/:username", () => {
         .delete('/api/users/icellusedkars')
       .expect(204)
     })
-  })
-  test('DELETE 404: Returns not found when user does not exist', () => {
-    return request(app)
-      .delete('/api/users/not_a_user')
-      .expect(404)
-      .then(({ body: { msg } }) => {
-      expect(msg).toBe('Username not found')
+    test('DELETE 404: Returns not found when user does not exist', () => {
+      return request(app)
+        .delete('/api/users/not_a_user')
+        .expect(404)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Username not found')
+      })
     })
   })
 });
