@@ -67,6 +67,23 @@ describe("/api/topics", () => {
     });
   });
 });
+describe('/api/topics/:slug', () => {
+  describe('DELETE', () => {
+    test('DELETE 204: Deletes specified topic and associated articles', () => {
+      return request(app)
+        .delete('/api/topics/mitch')
+      .expect(204)
+    })
+    test('DELETE 404: Returns not found if no such topic exists', () => {
+      return request(app)
+        .delete('/api/topics/not_a_topic')
+        .expect(404)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Topic not found')
+      })
+    })
+  })
+})
 describe("/api", () => {
   test("GET 200: Responds with enpoints.json file", () => {
     return request(app)
