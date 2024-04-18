@@ -237,5 +237,8 @@
         "avatar_url": "https://avatars2.githubusercontent.com/u/24394918?s=400&v=4"
       }
     }
+  },
+  "DELETE /api/users/:username": {
+    "description": "deletes specified username and responds with status 204 and no content"
   }
 }
