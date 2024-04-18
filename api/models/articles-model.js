@@ -19,40 +19,26 @@ exports.selectArticleById = (article_id) => {
 };
 
 exports.selectArticles = (topic, sort_by = 'created_at',order = 'desc',limit=10,p=1) => {
-  const validSortBy = ['author', 'title','article_id', 'topic', 'created_at', 'votes', 'article_img_url', 'comment_count'];
-  if (!validSortBy.includes(sort_by)) {
-    return Promise.reject({status:400,msg:'Bad request'})
-  }
+  return validateInputs(sort_by, order, limit, p)
+    .then(() => {
+      let sqlStr = `SELECT articles.author,title,articles.article_id,topic,articles.created_at,articles.votes,article_img_url, COUNT(comment_id)::INT AS comment_count, COUNT(articles.article_id) OVER() ::INT AS article_count  
+      FROM articles 
+      LEFT JOIN comments 
+      ON articles.article_id = comments.article_id 
+      `;
+      const queryVals = [];
+    
+      if (topic) {
+        sqlStr += `WHERE topic = $1`;
+        queryVals.push(topic);
+      }
+      sqlStr += ` GROUP BY
+      articles.article_id ORDER BY articles.${sort_by} ${order} LIMIT ${limit} OFFSET ${(p-1)*limit};`;
+      return db.query(sqlStr, queryVals).then(({ rows }) => {
+        return rows;
+      });
+  })
 
-  const validOrder = ['desc', 'asc']
-  if (!validOrder.includes(order.toLowerCase())) {
-    return Promise.reject({status:400,msg:'Bad request'})
-  }
- 
-  if (!Number(limit)) {
-    return Promise.reject({status:400,msg:'Bad request'})
-  }
-
-  if (!Number(p)) {
-    return Promise.reject({status:400,msg:'Bad request'})
-  }
-
-  let sqlStr = `SELECT articles.author,title,articles.article_id,topic,articles.created_at,articles.votes,article_img_url, COUNT(comment_id)::INT AS comment_count, COUNT(articles.article_id) OVER() ::INT AS article_count  
-  FROM articles 
-  LEFT JOIN comments 
-  ON articles.article_id = comments.article_id 
-  `;
-  const queryVals = [];
-
-  if (topic) {
-    sqlStr += `WHERE topic = $1`;
-    queryVals.push(topic);
-  }
-  sqlStr += ` GROUP BY
-  articles.article_id ORDER BY articles.${sort_by} ${order} LIMIT ${limit} OFFSET ${(p-1)*limit};`;
-  return db.query(sqlStr, queryVals).then(({ rows }) => {
-    return rows;
-  });
 };
 
 exports.updateArticle = (article_id, inc_votes) => {
@@ -99,4 +85,25 @@ exports.removeArticle = (article_id) => {
       return Promise.reject({status:404,msg:'Article not found'})
     }
   })
+}
+
+function validateInputs(sort_by, order, limit, p) {
+  const validSortBy = ['author', 'title','article_id', 'topic', 'created_at', 'votes', 'article_img_url', 'comment_count'];
+  if (!validSortBy.includes(sort_by)) {
+    return Promise.reject({status:400,msg:'Bad request'})
+  }
+
+  const validOrder = ['desc', 'asc']
+  if (!validOrder.includes(order.toLowerCase())) {
+    return Promise.reject({status:400,msg:'Bad request'})
+  }
+ 
+  if (!Number(limit)) {
+    return Promise.reject({status:400,msg:'Bad request'})
+  }
+
+  if (!Number(p)) {
+    return Promise.reject({status:400,msg:'Bad request'})
+  }
+  return Promise.resolve()
 }

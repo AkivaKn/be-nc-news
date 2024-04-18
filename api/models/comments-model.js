@@ -1,37 +1,26 @@
 const db = require("../connection");
 
 exports.selectComments = (username, article_id, limit = 10, p = 1, sort_by = 'created_at',order = 'desc') => {
-  const validSortBy = ['comment_id', 'votes','created_at', 'author', 'body', 'article_id'];
-  if (!validSortBy.includes(sort_by)) {
-    return Promise.reject({status:400,msg:'Bad request'})
-  }
-  const validOrder = ['desc', 'asc']
-  if (!validOrder.includes(order.toLowerCase())) {
-    return Promise.reject({status:400,msg:'Bad request'})
-  }
-  if (!Number(limit)) {
-    return Promise.reject({ status: 400, msg: "Bad request" });
-  }
-  if (!Number(p)) {
-    return Promise.reject({ status: 400, msg: "Bad request" });
-  }
-  let sqlStr = `SELECT * FROM comments `;
-  const queryVals = [];
-
-  if (username) {
-    sqlStr += `WHERE author=$1 `;
-    queryVals.push(username);
-  } else if (article_id) {
-    sqlStr += `WHERE article_id=$1 `;
-    queryVals.push(article_id);
-  }
-
-  sqlStr += `ORDER BY ${sort_by} ${order} LIMIT ${limit} OFFSET ${
-    (p - 1) * limit
-  };`;
-  return db.query(sqlStr, queryVals).then(({ rows }) => {
-    return rows;
-  });
+  return validateInputs(limit, p, sort_by, order)
+    .then(() => {
+      let sqlStr = `SELECT * FROM comments `;
+      const queryVals = [];
+    
+      if (username) {
+        sqlStr += `WHERE author=$1 `;
+        queryVals.push(username);
+      } else if (article_id) {
+        sqlStr += `WHERE article_id=$1 `;
+        queryVals.push(article_id);
+      }
+    
+      sqlStr += `ORDER BY ${sort_by} ${order} LIMIT ${limit} OFFSET ${
+        (p - 1) * limit
+      };`;
+      return db.query(sqlStr, queryVals).then(({ rows }) => {
+        return rows;
+      });
+  })
 };
 
 exports.insertComment = (article_id, username, body) => {
@@ -77,3 +66,21 @@ exports.updateComment = (comment_id, inc_votes) => {
       return rows[0];
     });
 };
+
+function validateInputs  (limit, p, sort_by, order)  {
+  const validSortBy = ['comment_id', 'votes','created_at', 'author', 'body', 'article_id'];
+  if (!validSortBy.includes(sort_by)) {
+    return Promise.reject({status:400,msg:'Bad request'})
+  }
+  const validOrder = ['desc', 'asc']
+  if (!validOrder.includes(order.toLowerCase())) {
+    return Promise.reject({status:400,msg:'Bad request'})
+  }
+  if (!Number(limit)) {
+    return Promise.reject({ status: 400, msg: "Bad request" });
+  }
+  if (!Number(p)) {
+    return Promise.reject({ status: 400, msg: "Bad request" });
+  }
+  return Promise.resolve()
+}
