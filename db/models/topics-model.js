@@ -26,3 +26,12 @@ exports.insertTopic = (newTopic) => {
     return rows[0]
   })
 }
+
+exports.removeTopic = (slug) => {
+  return db.query(`DELETE FROM topics WHERE slug=$1 RETURNING *;`, [slug])
+    .then(({ rows }) => {
+      if (rows.length === 0) {
+      return Promise.reject({status:404,msg:'Topic not found'})
+    }
+  })
+}

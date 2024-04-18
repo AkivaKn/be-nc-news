@@ -39,7 +39,7 @@ const seed = ({ topicData, userData, articleData, commentData }) => {
       CREATE TABLE articles (
         article_id SERIAL PRIMARY KEY,
         title VARCHAR NOT NULL,
-        topic VARCHAR NOT NULL REFERENCES topics(slug),
+        topic VARCHAR NOT NULL REFERENCES topics(slug) ON DELETE CASCADE,
         author VARCHAR NOT NULL REFERENCES users(username),
         body VARCHAR NOT NULL,
         created_at TIMESTAMP DEFAULT NOW(),
