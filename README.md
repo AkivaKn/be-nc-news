@@ -1,4 +1,4 @@
-# Northcoders News API
+# News Now API
 
 This is a Reddit based news database project, using express and node postgres to setup a RESTful API server and connect to a psql database. Endpoints have been created to access and query data.
 

@@ -1,8 +1,8 @@
 const request = require("supertest");
-const app = require("../db/app");
+const app = require("../api/app");
 const data = require("../db/data/test-data");
 const seed = require("../db/seeds/seed");
-const db = require("../db/connection");
+const db = require("../api/connection");
 const endpoints = require("../endpoints.json");
 const { reduceRight } = require("../db/data/test-data/articles");
 
@@ -67,23 +67,21 @@ describe("/api/topics", () => {
     });
   });
 });
-describe('/api/topics/:slug', () => {
-  describe('DELETE', () => {
-    test('DELETE 204: Deletes specified topic and associated articles', () => {
+describe("/api/topics/:slug", () => {
+  describe("DELETE", () => {
+    test("DELETE 204: Deletes specified topic and associated articles", () => {
+      return request(app).delete("/api/topics/mitch").expect(204);
+    });
+    test("DELETE 404: Returns not found if no such topic exists", () => {
       return request(app)
-        .delete('/api/topics/mitch')
-      .expect(204)
-    })
-    test('DELETE 404: Returns not found if no such topic exists', () => {
-      return request(app)
-        .delete('/api/topics/not_a_topic')
+        .delete("/api/topics/not_a_topic")
         .expect(404)
         .then(({ body: { msg } }) => {
-        expect(msg).toBe('Topic not found')
-      })
-    })
-  })
-})
+          expect(msg).toBe("Topic not found");
+        });
+    });
+  });
+});
 describe("/api", () => {
   test("GET 200: Responds with enpoints.json file", () => {
     return request(app)
@@ -202,22 +200,22 @@ describe("/api/articles/:article_id", () => {
     test("DELETE 204: Deletes specified article and responds with 204", () => {
       return request(app).delete("/api/articles/1").expect(204);
     });
-    test('DELETE 404: Returns not found when article does not exist', () => {
+    test("DELETE 404: Returns not found when article does not exist", () => {
       return request(app)
-        .delete('/api/articles/100')
+        .delete("/api/articles/100")
         .expect(404)
         .then(({ body: { msg } }) => {
-        expect(msg).toBe('Article not found')
-      })
-    })
-    test('DELETE 404: Returns bad request when article_id is not a number', () => {
+          expect(msg).toBe("Article not found");
+        });
+    });
+    test("DELETE 404: Returns bad request when article_id is not a number", () => {
       return request(app)
-        .delete('/api/articles/not_a_number')
+        .delete("/api/articles/not_a_number")
         .expect(400)
         .then(({ body: { msg } }) => {
-        expect(msg).toBe('Bad request')
-      })
-    })
+          expect(msg).toBe("Bad request");
+        });
+    });
   });
 });
 describe("/api/articles", () => {
@@ -770,7 +768,7 @@ describe("/api/users/:username", () => {
     });
   });
 });
-describe('/api/users/:username/comments', () => {
+describe("/api/users/:username/comments", () => {
   describe("GET", () => {
     test("GET 200: Responds with an array of comments with the correct keys", () => {
       return request(app)
@@ -784,7 +782,7 @@ describe('/api/users/:username/comments', () => {
             expect(typeof comment.created_at).toBe("string");
             expect(comment.author).toBe("icellusedkars");
             expect(typeof comment.body).toBe("string");
-            expect(typeof comment.article_id).toBe('number');
+            expect(typeof comment.article_id).toBe("number");
           });
         });
     });
@@ -830,7 +828,9 @@ describe('/api/users/:username/comments', () => {
     });
     test("GET 400: Returns bad request when limit provided is not a number", () => {
       return request(app)
-        .get("/api/users/icellusedkars/comments?limit=45;SELECT * FROM articles;")
+        .get(
+          "/api/users/icellusedkars/comments?limit=45;SELECT * FROM articles;"
+        )
         .then(({ body: { msg } }) => {
           expect(msg).toBe("Bad request");
         });
@@ -851,4 +851,4 @@ describe('/api/users/:username/comments', () => {
         });
     });
   });
-})
+});
