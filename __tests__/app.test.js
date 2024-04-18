@@ -897,6 +897,21 @@ describe("/api/users/:username", () => {
         });
     });
   });
+  describe('DELETE', () => {
+    test('DELETE 204: Deletes specified user and responds with 204', () => {
+      return request(app)
+        .delete('/api/users/icellusedkars')
+      .expect(204)
+    })
+  })
+  test('DELETE 404: Returns not found when user does not exist', () => {
+    return request(app)
+      .delete('/api/users/not_a_user')
+      .expect(404)
+      .then(({ body: { msg } }) => {
+      expect(msg).toBe('Username not found')
+    })
+  })
 });
 describe("/api/users/:username/comments", () => {
   describe("GET", () => {
