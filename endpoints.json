@@ -99,6 +99,9 @@
       }
     }
   },
+  "DELETE /api/articles/:article_id": {
+    "description": "deletes specified article and responds with status 204 and no content"
+  },
   "GET /api/articles/:article_id/comments": {
     "description": "serves an array of comments related to the specified article",
     "queries": ["limit","p"],

@@ -39,33 +39,33 @@ describe("/api/topics", () => {
         });
     });
   });
-  describe('POST', () => {
-    test('POST 201: Responds with newly posted topic', () => {
+  describe("POST", () => {
+    test("POST 201: Responds with newly posted topic", () => {
       const newTopic = {
-        "slug": "example_name",
-        "description": "example description"
-      }
+        slug: "example_name",
+        description: "example description",
+      };
       return request(app)
-        .post('/api/topics')
+        .post("/api/topics")
         .send(newTopic)
         .expect(201)
         .then(({ body: { topic } }) => {
-        expect(topic).toMatchObject(newTopic)
-      })
-    })
-    test('POST 400: Returns bad request when passed incomplete data', () => {
+          expect(topic).toMatchObject(newTopic);
+        });
+    });
+    test("POST 400: Returns bad request when passed incomplete data", () => {
       const newTopic = {
-        "description": "example description"
-      }
+        description: "example description",
+      };
       return request(app)
-        .post('/api/topics')
+        .post("/api/topics")
         .send(newTopic)
         .expect(400)
         .then(({ body: { msg } }) => {
-        expect(msg).toBe('Bad request')
-      })
-    })
-  })
+          expect(msg).toBe("Bad request");
+        });
+    });
+  });
 });
 describe("/api", () => {
   test("GET 200: Responds with enpoints.json file", () => {
@@ -180,6 +180,27 @@ describe("/api/articles/:article_id", () => {
           expect(msg).toBe("Article not found");
         });
     });
+  });
+  describe("DELETE", () => {
+    test("DELETE 204: Deletes specified article and responds with 204", () => {
+      return request(app).delete("/api/articles/1").expect(204);
+    });
+    test('DELETE 404: Returns not found when article does not exist', () => {
+      return request(app)
+        .delete('/api/articles/100')
+        .expect(404)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Article not found')
+      })
+    })
+    test('DELETE 404: Returns bad request when article_id is not a number', () => {
+      return request(app)
+        .delete('/api/articles/not_a_number')
+        .expect(400)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Bad request')
+      })
+    })
   });
 });
 describe("/api/articles", () => {
@@ -471,30 +492,30 @@ describe("/api/articles/:article_id/comments", () => {
           expect(comments.length).toBe(0);
         });
     });
-    test('GET 200: Accepts a limit query and responds accordingly', () => {
+    test("GET 200: Accepts a limit query and responds accordingly", () => {
       return request(app)
         .get("/api/articles/1/comments?limit=2")
         .expect(200)
         .then(({ body: { comments } }) => {
           expect(comments).toHaveLength(2);
         });
-    })
-    test('GET 200: Response has default pagination of 10', () => {
+    });
+    test("GET 200: Response has default pagination of 10", () => {
       return request(app)
         .get("/api/articles/1/comments")
         .expect(200)
         .then(({ body: { comments } }) => {
           expect(comments).toHaveLength(10);
         });
-    })
-    test('GET 200: Accepts a p(page) query and responds accordingly', () => {
+    });
+    test("GET 200: Accepts a p(page) query and responds accordingly", () => {
       return request(app)
         .get("/api/articles/1/comments?limit=2&&p=2")
         .expect(200)
         .then(({ body: { comments } }) => {
           expect(comments[0].comment_id).toBe(18);
         });
-    })
+    });
     test("GET 400: Returns bad request when limit provided is not a number", () => {
       return request(app)
         .get("/api/articles/1/comments?limit=45;SELECT * FROM articles;")
