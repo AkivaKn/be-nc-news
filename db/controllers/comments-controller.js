@@ -8,9 +8,10 @@ const {
 
 exports.getComments = (req, res, next) => {
   const { article_id } = req.params;
+  const { limit ,p} = req.query;
   return checkArticleExists(article_id)
     .then(() => {
-      return selectComments(article_id);
+      return selectComments(article_id,limit,p);
     })
     .then((comments) => {
       res.status(200).send({ comments });

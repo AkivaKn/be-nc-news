@@ -417,7 +417,7 @@ describe("/api/articles/:article_id/comments", () => {
         .get("/api/articles/1/comments")
         .expect(200)
         .then(({ body: { comments } }) => {
-          expect(comments.length).toBe(11);
+          expect(comments.length).toBeGreaterThan(0);
           comments.forEach((comment) => {
             expect(typeof comment.comment_id).toBe("number");
             expect(typeof comment.votes).toBe("number");
@@ -442,6 +442,44 @@ describe("/api/articles/:article_id/comments", () => {
         .expect(200)
         .then(({ body: { comments } }) => {
           expect(comments.length).toBe(0);
+        });
+    });
+    test('GET 200: Accepts a limit query and responds accordingly', () => {
+      return request(app)
+        .get("/api/articles/1/comments?limit=2")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments).toHaveLength(2);
+        });
+    })
+    test('GET 200: Response has default pagination of 10', () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments).toHaveLength(10);
+        });
+    })
+    test('GET 200: Accepts a p(page) query and responds accordingly', () => {
+      return request(app)
+        .get("/api/articles/1/comments?limit=2&&p=2")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments[0].comment_id).toBe(18);
+        });
+    })
+    test("GET 400: Returns bad request when limit provided is not a number", () => {
+      return request(app)
+        .get("/api/articles/1/comments?limit=45;SELECT * FROM articles;")
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test("GET 400: Returns bad request when page provided is not a number", () => {
+      return request(app)
+        .get("/api/articles/1/comments?p=5;SELECT * FROM articles;")
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
         });
     });
     test("GET 404: Returns article not found if no such article exists", () => {
