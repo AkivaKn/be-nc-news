@@ -162,7 +162,7 @@ describe("/api/articles", () => {
         .get("/api/articles")
         .expect(200)
         .then(({ body: { articles } }) => {
-          expect(articles.length).toBe(13);
+          expect(articles.length).toBeGreaterThan(0);
           expect(articles[0].comment_count).toBe(2);
           articles.forEach((article) => {
             expect(typeof article.author).toBe("string");
@@ -216,6 +216,73 @@ describe("/api/articles", () => {
         .then(({ body: { articles } }) => {
           expect(articles).toBeSortedBy("author");
         });
+    });
+    test("GET 200: Defaults to returning 10 articles", () => {
+      return request(app)
+        .get("/api/articles")
+        .then(({ body: { articles } }) => {
+          expect(articles).toHaveLength(10);
+        });
+    });
+    test("GET 200: Accepts a limit query and returns accordingly", () => {
+      return request(app)
+        .get("/api/articles?limit=5")
+        .then(({ body: { articles } }) => {
+          expect(articles).toHaveLength(5);
+        });
+    });
+    test("GET 200: Accepts a p(page) query and returns accordingly", () => {
+      return request(app)
+        .get("/api/articles?p=2&&sort_by=article_id&&order=asc")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles[0].article_id).toBe(11);
+          expect(articles).toHaveLength(3);
+        });
+    });
+    test("GET 200: Returns articles with a total_count property matching the number of articles returned", () => {
+      return request(app)
+        .get("/api/articles?topic=cats")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles).toHaveLength(1);
+          articles.forEach((article) => {
+            expect(article.article_count).toBe(1);
+          });
+        });
+    });
+    test("GET 200: Ignores limit when returning total_count property", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles).toHaveLength(10);
+          articles.forEach((article) => {
+            expect(article.article_count).toBe(13);
+          });
+        });
+    });
+    test("GET 200: Ignores limit when returning comment_count property", () => {
+      return request(app)
+        .get("/api/articles?sort_by=article_id&&order=asc")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles[0].comment_count).toBe(11);
+        });
+    });
+    test("GET 400: Returns bad request when limit provided is not a number", () => {
+      return request(app)
+        .get("/api/articles?limit=45;SELECT * FROM articles;")
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test("GET 400: Returns bad request when p provided is not a number", () => {
+      return request(app)
+        .get(
+          "/api/articles?p=2 SELECT * FROM articles;&&sort_by=article_id&&order=asc"
+        )
+        .expect(400);
     });
     test("GET 404: Returns not found if topic does not exist", () => {
       return request(app)
@@ -271,13 +338,13 @@ describe("/api/articles", () => {
         .then(({ body: { article } }) => {
           expect(article).toMatchObject(expected);
         });
-    })
-    test('POST 201: Responds with newly created article with default article_img_url', () => {
+    });
+    test("POST 201: Responds with newly created article with default article_img_url", () => {
       const newArticle = {
         title: "Sony Vaio; or, The Laptop",
         topic: "mitch",
         author: "icellusedkars",
-        body: "Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me."
+        body: "Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me.",
       };
       const expected = {
         title: "Sony Vaio; or, The Laptop",
@@ -288,26 +355,26 @@ describe("/api/articles", () => {
         article_id: expect.any(Number),
         votes: 0,
         created_at: expect.any(String),
-        comment_count: 0
+        comment_count: 0,
       };
-    })
-    test('POST 400: Returns bad request when passed incomplete data', () => {
+    });
+    test("POST 400: Returns bad request when passed incomplete data", () => {
       const newArticle = {
         title: "Sony Vaio; or, The Laptop",
         topic: "mitch",
         body: "Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me.",
         article_img_url:
           "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-      }
+      };
       return request(app)
-        .post('/api/articles')
+        .post("/api/articles")
         .send(newArticle)
         .expect(400)
         .then(({ body: { msg } }) => {
-        expect(msg).toBe('Bad request')
-      })
-    })
-    test('POST 400: Returns bad request when passed with a topic that is not in database', () => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test("POST 400: Returns bad request when passed with a topic that is not in database", () => {
       const newArticle = {
         title: "Sony Vaio; or, The Laptop",
         topic: "not_a_topic",
@@ -315,16 +382,16 @@ describe("/api/articles", () => {
         body: "Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me.",
         article_img_url:
           "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-      }
+      };
       return request(app)
-        .post('/api/articles')
+        .post("/api/articles")
         .send(newArticle)
         .expect(400)
         .then(({ body: { msg } }) => {
-        expect(msg).toBe('Bad request')
-      })
-    })
-    test('POST 400: Returns bad request when passed with an author that is not in database', () => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test("POST 400: Returns bad request when passed with an author that is not in database", () => {
       const newArticle = {
         title: "Sony Vaio; or, The Laptop",
         topic: "mitch",
@@ -332,15 +399,15 @@ describe("/api/articles", () => {
         body: "Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me.",
         article_img_url:
           "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-      }
+      };
       return request(app)
-        .post('/api/articles')
+        .post("/api/articles")
         .send(newArticle)
         .expect(400)
         .then(({ body: { msg } }) => {
-        expect(msg).toBe('Bad request')
-      })
-    })
+          expect(msg).toBe("Bad request");
+        });
+    });
   });
 });
 describe("/api/articles/:article_id/comments", () => {
