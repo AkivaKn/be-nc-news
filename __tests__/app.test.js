@@ -531,6 +531,38 @@ describe("/api/articles/:article_id/comments", () => {
           expect(comments[0].comment_id).toBe(18);
         });
     });
+    test('GET 200: Accepts a sort_by query and responds accordingly', () => {
+      return request(app)
+        .get('/api/articles/1/comments?sort_by=votes')
+        .expect(200)
+        .then(({ body: { comments } }) => {
+        expect(comments).toBeSortedBy('votes',{descending:true})
+      })
+    })
+    test('GET 200: Accepts an order query and responds accordingly', () => {
+      return request(app)
+        .get('/api/articles/1/comments?order=asc')
+        .expect(200)
+        .then(({ body: { comments } }) => {
+        expect(comments).toBeSortedBy('created_at')
+      })
+    })
+    test('GET 400: Returns bad request if order is not asc or desc', () => {
+      return request(app)
+        .get("/api/articles/1/comments?order=incorrect")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    })
+    test('GET 400: Returns bad request if sort_by is not a valid column', () => {
+      return request(app)
+        .get('/api/articles/1/comments?sort_by=not_a_column')
+        .expect(400)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Bad request')
+      })
+    })
     test("GET 400: Returns bad request when limit provided is not a number", () => {
       return request(app)
         .get("/api/articles/1/comments?limit=45;SELECT * FROM articles;")
@@ -924,6 +956,38 @@ describe("/api/users/:username/comments", () => {
           expect(comments[0].comment_id).toBe(10);
         });
     });
+    test('GET 200: Accepts a sort_by query and responds accordingly', () => {
+      return request(app)
+        .get('/api/users/icellusedkars/comments?sort_by=votes')
+        .expect(200)
+        .then(({ body: { comments } }) => {
+        expect(comments).toBeSortedBy('votes',{descending:true})
+      })
+    })
+    test('GET 200: Accepts an order query and responds accordingly', () => {
+      return request(app)
+        .get('/api/users/icellusedkars/comments?order=asc')
+        .expect(200)
+        .then(({ body: { comments } }) => {
+        expect(comments).toBeSortedBy('created_at')
+      })
+    })
+    test('GET 400: Returns bad request if order is not asc or desc', () => {
+      return request(app)
+        .get("/api/users/icellusedkars/comments?order=incorrect")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    })
+    test('GET 400: Returns bad request if sort_by is not a valid column', () => {
+      return request(app)
+        .get('/api/users/icellusedkars/comments?sort_by=not_a_column')
+        .expect(400)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Bad request')
+      })
+    })
     test("GET 400: Returns bad request when limit provided is not a number", () => {
       return request(app)
         .get(
