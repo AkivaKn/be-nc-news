@@ -5,13 +5,14 @@ const {
   removeComment,
   updateComment,
 } = require("../models/comments-model");
+const { checkUsernameExists } = require("../models/users-model");
 
 exports.getComments = (req, res, next) => {
-  const { article_id } = req.params;
-  const { limit ,p} = req.query;
-  return checkArticleExists(article_id)
+  const { username, article_id } = req.params;
+  const { limit, p } = req.query;
+    return Promise.all([checkArticleExists(article_id),checkUsernameExists(username)])
     .then(() => {
-      return selectComments(article_id,limit,p);
+      return selectComments(username,article_id,limit,p);
     })
     .then((comments) => {
       res.status(200).send({ comments });
