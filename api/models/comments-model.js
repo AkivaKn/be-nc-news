@@ -1,6 +1,14 @@
 const db = require("../connection");
 
-exports.selectComments = (username, article_id, limit = 10, p = 1) => {
+exports.selectComments = (username, article_id, limit = 10, p = 1, sort_by = 'created_at',order = 'desc') => {
+  const validSortBy = ['comment_id', 'votes','created_at', 'author', 'body', 'article_id'];
+  if (!validSortBy.includes(sort_by)) {
+    return Promise.reject({status:400,msg:'Bad request'})
+  }
+  const validOrder = ['desc', 'asc']
+  if (!validOrder.includes(order.toLowerCase())) {
+    return Promise.reject({status:400,msg:'Bad request'})
+  }
   if (!Number(limit)) {
     return Promise.reject({ status: 400, msg: "Bad request" });
   }
@@ -18,7 +26,7 @@ exports.selectComments = (username, article_id, limit = 10, p = 1) => {
     queryVals.push(article_id);
   }
 
-  sqlStr += `ORDER BY created_at DESC LIMIT ${limit} OFFSET ${
+  sqlStr += `ORDER BY ${sort_by} ${order} LIMIT ${limit} OFFSET ${
     (p - 1) * limit
   };`;
   return db.query(sqlStr, queryVals).then(({ rows }) => {

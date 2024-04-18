@@ -170,6 +170,30 @@
       ]
     }
   },
+  "GET /api/comments": {
+    "description": "serves an array of users",
+    "queries": ["limit","p","sort_by","order"],
+    "exampleResponse": {
+      "comments": [
+        {
+          "comment_id": 5,
+          "body": "I hate streaming noses",
+          "article_id": 1,
+          "author": "icellusedkars",
+          "votes": 0,
+          "created_at": "2020-11-03T21:00:00.000Z"
+        },
+        {
+          "comment_id": 2,
+          "body": "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+          "article_id": 1,
+          "author": "butter_bridge",
+          "votes": 14,
+          "created_at": "2020-10-31T03:03:00.000Z"
+        }
+      ]
+    }
+  },
   "PATCH /api/comments/:comment_id": {
     "description": "returns an comment object of the provided id with an updated vote",
     "exampleRequest": { "inc_votes": 3 },

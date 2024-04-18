@@ -9,10 +9,10 @@ const { checkUsernameExists } = require("../models/users-model");
 
 exports.getComments = (req, res, next) => {
   const { username, article_id } = req.params;
-  const { limit, p } = req.query;
+  const { limit, p ,sort_by,order} = req.query;
     return Promise.all([checkArticleExists(article_id),checkUsernameExists(username)])
     .then(() => {
-      return selectComments(username,article_id,limit,p);
+      return selectComments(username,article_id,limit,p,sort_by,order);
     })
     .then((comments) => {
       res.status(200).send({ comments });

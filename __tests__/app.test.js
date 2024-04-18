@@ -24,6 +24,16 @@ describe("Error handling", () => {
       });
   });
 });
+describe("/api", () => {
+  test("GET 200: Responds with enpoints.json file", () => {
+    return request(app)
+      .get("/api")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toEqual(endpoints);
+      });
+  });
+});
 describe("/api/topics", () => {
   describe("GET", () => {
     test("GET 200: Responds with an array of topic objects each containing a slug and description key", () => {
@@ -78,142 +88,6 @@ describe("/api/topics/:slug", () => {
         .expect(404)
         .then(({ body: { msg } }) => {
           expect(msg).toBe("Topic not found");
-        });
-    });
-  });
-});
-describe("/api", () => {
-  test("GET 200: Responds with enpoints.json file", () => {
-    return request(app)
-      .get("/api")
-      .expect(200)
-      .then(({ body }) => {
-        expect(body).toEqual(endpoints);
-      });
-  });
-});
-describe("/api/articles/:article_id", () => {
-  describe("GET", () => {
-    test("GET 200: Responds with an article object with the correct keys", () => {
-      const expected = {
-        author: "butter_bridge",
-        title: "Living in the shadow of a great man",
-        article_id: 1,
-        body: "I find this existence challenging",
-        topic: "mitch",
-        created_at: "2020-07-09T20:11:00.000Z",
-        votes: 100,
-        article_img_url:
-          "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-      };
-      return request(app)
-        .get("/api/articles/1")
-        .expect(200)
-        .then(({ body: { article } }) => {
-          expect(article).toMatchObject(expected);
-        });
-    });
-    test("GET 200: Response object includes a comment_count key", () => {
-      return request(app)
-        .get("/api/articles/1")
-        .expect(200)
-        .then(({ body: { article } }) => {
-          expect(article.comment_count).toBe(11);
-        });
-    });
-    test("GET 404: Responds with article not found when passed an article_id with no corresponding article", () => {
-      return request(app)
-        .get("/api/articles/100")
-        .expect(404)
-        .then(({ body: { msg } }) => {
-          expect(msg).toBe("Article not found");
-        });
-    });
-    test("GET 400: Responds with bad request if passed an article_id value which is not an integer", () => {
-      return request(app)
-        .get("/api/articles/not-a-number")
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).toBe("Bad request");
-        });
-    });
-  });
-  describe("PATCH", () => {
-    test("PATCH 200: Responds with updated object when passed an object with votes in the correct syntax", () => {
-      const expected = {
-        author: "butter_bridge",
-        title: "Living in the shadow of a great man",
-        article_id: 1,
-        body: "I find this existence challenging",
-        topic: "mitch",
-        created_at: "2020-07-09T20:11:00.000Z",
-        votes: 110,
-        article_img_url:
-          "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-      };
-      return request(app)
-        .patch("/api/articles/1")
-        .send({ inc_votes: 10 })
-        .expect(200)
-        .then(({ body: { article } }) => {
-          expect(article).toMatchObject(expected);
-        });
-    });
-    test("PATCH 400: Responds with bad request when passed an object with no inc_votes key", () => {
-      return request(app)
-        .patch("/api/articles/1")
-        .send({ votes: 10 })
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).toBe("Bad request");
-        });
-    });
-    test("PATCH 400: Responds with bad request when passed a value of inc_votes which is not a number", () => {
-      return request(app)
-        .patch("/api/articles/1")
-        .send({ inc_votes: "not a number" })
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).toBe("Bad request");
-        });
-    });
-    test("PATCH 400: Responds with bad request when passed an article_id which is not a number", () => {
-      return request(app)
-        .patch("/api/articles/first_article")
-        .send({ inc_votes: 10 })
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).toBe("Bad request");
-        });
-    });
-    test("PATCH 404: Responds with not found when passed an article_id which does not exist", () => {
-      return request(app)
-        .patch("/api/articles/100")
-        .send({ inc_votes: 5 })
-        .expect(404)
-        .then(({ body: { msg } }) => {
-          expect(msg).toBe("Article not found");
-        });
-    });
-  });
-  describe("DELETE", () => {
-    test("DELETE 204: Deletes specified article and responds with 204", () => {
-      return request(app).delete("/api/articles/1").expect(204);
-    });
-    test("DELETE 404: Returns not found when article does not exist", () => {
-      return request(app)
-        .delete("/api/articles/100")
-        .expect(404)
-        .then(({ body: { msg } }) => {
-          expect(msg).toBe("Article not found");
-        });
-    });
-    test("DELETE 404: Returns bad request when article_id is not a number", () => {
-      return request(app)
-        .delete("/api/articles/not_a_number")
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).toBe("Bad request");
         });
     });
   });
@@ -473,6 +347,132 @@ describe("/api/articles", () => {
     });
   });
 });
+describe("/api/articles/:article_id", () => {
+  describe("GET", () => {
+    test("GET 200: Responds with an article object with the correct keys", () => {
+      const expected = {
+        author: "butter_bridge",
+        title: "Living in the shadow of a great man",
+        article_id: 1,
+        body: "I find this existence challenging",
+        topic: "mitch",
+        created_at: "2020-07-09T20:11:00.000Z",
+        votes: 100,
+        article_img_url:
+          "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+      };
+      return request(app)
+        .get("/api/articles/1")
+        .expect(200)
+        .then(({ body: { article } }) => {
+          expect(article).toMatchObject(expected);
+        });
+    });
+    test("GET 200: Response object includes a comment_count key", () => {
+      return request(app)
+        .get("/api/articles/1")
+        .expect(200)
+        .then(({ body: { article } }) => {
+          expect(article.comment_count).toBe(11);
+        });
+    });
+    test("GET 404: Responds with article not found when passed an article_id with no corresponding article", () => {
+      return request(app)
+        .get("/api/articles/100")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Article not found");
+        });
+    });
+    test("GET 400: Responds with bad request if passed an article_id value which is not an integer", () => {
+      return request(app)
+        .get("/api/articles/not-a-number")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+  });
+  describe("PATCH", () => {
+    test("PATCH 200: Responds with updated object when passed an object with votes in the correct syntax", () => {
+      const expected = {
+        author: "butter_bridge",
+        title: "Living in the shadow of a great man",
+        article_id: 1,
+        body: "I find this existence challenging",
+        topic: "mitch",
+        created_at: "2020-07-09T20:11:00.000Z",
+        votes: 110,
+        article_img_url:
+          "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+      };
+      return request(app)
+        .patch("/api/articles/1")
+        .send({ inc_votes: 10 })
+        .expect(200)
+        .then(({ body: { article } }) => {
+          expect(article).toMatchObject(expected);
+        });
+    });
+    test("PATCH 400: Responds with bad request when passed an object with no inc_votes key", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({ votes: 10 })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test("PATCH 400: Responds with bad request when passed a value of inc_votes which is not a number", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({ inc_votes: "not a number" })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test("PATCH 400: Responds with bad request when passed an article_id which is not a number", () => {
+      return request(app)
+        .patch("/api/articles/first_article")
+        .send({ inc_votes: 10 })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test("PATCH 404: Responds with not found when passed an article_id which does not exist", () => {
+      return request(app)
+        .patch("/api/articles/100")
+        .send({ inc_votes: 5 })
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Article not found");
+        });
+    });
+  });
+  describe("DELETE", () => {
+    test("DELETE 204: Deletes specified article and responds with 204", () => {
+      return request(app).delete("/api/articles/1").expect(204);
+    });
+    test("DELETE 404: Returns not found when article does not exist", () => {
+      return request(app)
+        .delete("/api/articles/100")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Article not found");
+        });
+    });
+    test("DELETE 404: Returns bad request when article_id is not a number", () => {
+      return request(app)
+        .delete("/api/articles/not_a_number")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+  });
+});
 describe("/api/articles/:article_id/comments", () => {
   describe("GET", () => {
     test("GET 200: Responds with an array of comments with the correct keys", () => {
@@ -650,6 +650,104 @@ describe("/api/articles/:article_id/comments", () => {
     });
   });
 });
+describe('/api/comments', () => {
+  describe('GET', () => {
+    test('GET 200: Responds with an array of all comments', () => {
+      return request(app)
+        .get('/api/comments')
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments.length).toBeGreaterThan(0)
+          comments.forEach((comment) => {
+            expect(typeof comment.comment_id).toBe("number");
+            expect(typeof comment.votes).toBe("number");
+            expect(typeof comment.created_at).toBe("string");
+            expect(typeof comment.author).toBe("string");
+            expect(typeof comment.body).toBe("string");
+            expect(typeof comment.article_id).toBe('number');
+          })
+      })
+    })
+    test("GET 200: Response is sorted by default by date descending", () => {
+      return request(app)
+        .get("/api/comments")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments).toBeSortedBy("created_at", { descending: true });
+        });
+    });
+    test("GET 200: Accepts a limit query and responds accordingly", () => {
+      return request(app)
+        .get("/api/comments?limit=2")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments).toHaveLength(2);
+        });
+    });
+    test("GET 200: Response has default pagination of 10", () => {
+      return request(app)
+        .get("/api/comments")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments).toHaveLength(10);
+        });
+    });
+    test("GET 200: Accepts a p(page) query and responds accordingly", () => {
+      return request(app)
+        .get("/api/comments?limit=2&&p=2")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments[0].comment_id).toBe(2);
+        });
+    });
+    test('GET 200: Accepts a sort_by query and responds accordingly', () => {
+      return request(app)
+        .get('/api/comments?sort_by=votes')
+        .expect(200)
+        .then(({ body: { comments } }) => {
+        expect(comments).toBeSortedBy('votes',{descending:true})
+      })
+    })
+    test('GET 200: Accepts an order query and responds accordingly', () => {
+      return request(app)
+        .get('/api/comments?order=asc')
+        .expect(200)
+        .then(({ body: { comments } }) => {
+        expect(comments).toBeSortedBy('created_at')
+      })
+    })
+    test('GET 400: Returns bad request if order is not asc or desc', () => {
+      return request(app)
+        .get("/api/comments?order=incorrect")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    })
+    test('GET 400: Returns bad request if sort_by is not a valid column', () => {
+      return request(app)
+        .get('/api/comments?sort_by=not_a_column')
+        .expect(400)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Bad request')
+      })
+    })
+    test("GET 400: Returns bad request when limit provided is not a number", () => {
+      return request(app)
+        .get("/api/comments?limit=45;SELECT * FROM articles;")
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test("GET 400: Returns bad request when page provided is not a number", () => {
+      return request(app)
+        .get("/api/comments?p=5;SELECT * FROM articles;")
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+  })
+})
 describe("/api/commments/:comment_id", () => {
   describe("DELETE", () => {
     test("DELETE 204: Returns a status 204 when passed a comment_id to delete", () => {
