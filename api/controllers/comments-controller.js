@@ -1,19 +1,15 @@
-const { checkArticleExists } = require("../models/articles-model");
+const { checkExists } = require("../../db/seeds/utils");
 const {
   selectComments,
   insertComment,
   removeComment,
   updateComment,
 } = require("../models/comments-model");
-const { checkUsernameExists } = require("../models/users-model");
 
 exports.getComments = (req, res, next) => {
   const { username, article_id } = req.params;
   const { limit, p ,sort_by,order} = req.query;
-    return Promise.all([checkArticleExists(article_id),checkUsernameExists(username)])
-    .then(() => {
-      return selectComments(username,article_id,limit,p,sort_by,order);
-    })
+      return selectComments(username,article_id,limit,p,sort_by,order)
     .then((comments) => {
       res.status(200).send({ comments });
     })
@@ -23,7 +19,7 @@ exports.getComments = (req, res, next) => {
 exports.postComment = (req, res, next) => {
   const { article_id } = req.params;
   const { username, body } = req.body;
-  return checkArticleExists(article_id)
+  return checkExists('articles','article_id',article_id,'Article')
     .then(() => {
       return insertComment(article_id, username, body)
     })
