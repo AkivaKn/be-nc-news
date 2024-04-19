@@ -24,14 +24,26 @@ describe("Error handling", () => {
   });
 });
 describe("/api", () => {
-  test("GET 200: Responds with enpoints.json file", () => {
-    return request(app)
-      .get("/api")
-      .expect(200)
-      .then(({ body }) => {
-        expect(body).toEqual(endpoints);
-      });
-  });
+  describe('GET', () => {
+    test("GET 200: Responds with enpoints.json file", () => {
+      return request(app)
+        .get("/api")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body).toEqual(endpoints);
+        });
+    });
+  })
+  describe('ALL', () => {
+    test('ALL 405: Returns Method not allowed if called with any other method', () => {
+      return request(app)
+        .post('/api')
+        .expect(405)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Method not allowed')
+      })
+    })
+  })
 });
 describe("/api/topics", () => {
   describe("GET", () => {
@@ -75,6 +87,16 @@ describe("/api/topics", () => {
         });
     });
   });
+  describe('ALL', () => {
+    test('ALL 405: Returns Method not allowed if called with any other method', () => {
+      return request(app)
+        .patch('/api/topics')
+        .expect(405)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Method not allowed')
+      })
+    })
+  })
 });
 describe("/api/topics/:slug", () => {
   describe("DELETE", () => {
@@ -90,6 +112,16 @@ describe("/api/topics/:slug", () => {
         });
     });
   });
+  describe('ALL', () => {
+    test('ALL 405: Returns Method not allowed if called with any other method', () => {
+      return request(app)
+        .get('/api/topics/cats')
+        .expect(405)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Method not allowed')
+      })
+    })
+  })
 });
 describe("/api/articles", () => {
   describe("GET", () => {
@@ -348,6 +380,16 @@ describe("/api/articles", () => {
         });
     });
   });
+  describe('ALL', () => {
+    test('ALL 405: Returns Method not allowed if called with any other method', () => {
+      return request(app)
+        .patch('/api/articles')
+        .expect(405)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Method not allowed')
+      })
+    })
+  })
 });
 describe("/api/articles/:article_id", () => {
   describe("GET", () => {
@@ -474,6 +516,16 @@ describe("/api/articles/:article_id", () => {
         });
     });
   });
+  describe('ALL', () => {
+    test('ALL 405: Returns Method not allowed if called with any other method', () => {
+      return request(app)
+        .post('/api/articles/1')
+        .expect(405)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Method not allowed')
+      })
+    })
+  })
 });
 describe("/api/articles/:article_id/comments", () => {
   describe("GET", () => {
@@ -683,6 +735,16 @@ describe("/api/articles/:article_id/comments", () => {
         });
     });
   });
+  describe('ALL', () => {
+    test('ALL 405: Returns Method not allowed if called with any other method', () => {
+      return request(app)
+        .delete('/api/articles/1/comments')
+        .expect(405)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Method not allowed')
+      })
+    })
+  })
 });
 describe('/api/comments', () => {
   describe('GET', () => {
@@ -789,6 +851,16 @@ describe('/api/comments', () => {
         });
     });
   })
+  describe('ALL', () => {
+    test('ALL 405: Returns Method not allowed if called with any other method', () => {
+      return request(app)
+        .patch('/api/comments')
+        .expect(405)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Method not allowed')
+      })
+    })
+  })
 })
 describe("/api/commments/:comment_id", () => {
   describe("DELETE", () => {
@@ -866,6 +938,16 @@ describe("/api/commments/:comment_id", () => {
         });
     });
   });
+  describe('ALL', () => {
+    test('ALL 405: Returns Method not allowed if called with any other method', () => {
+      return request(app)
+        .get('/api/comments/2')
+        .expect(405)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Method not allowed')
+      })
+    })
+  })
 });
 describe("/api/users", () => {
   describe("GET", () => {
@@ -894,6 +976,16 @@ describe("/api/users", () => {
       })
     })
   });
+  describe('ALL', () => {
+    test('ALL 405: Returns Method not allowed if called with any other method', () => {
+      return request(app)
+        .delete('/api/users')
+        .expect(405)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Method not allowed')
+      })
+    })
+  })
 });
 describe("/api/users/:username", () => {
   describe("GET", () => {
@@ -930,14 +1022,24 @@ describe("/api/users/:username", () => {
     test('DELETE 204: Deletes specified user and responds with 204', () => {
       return request(app)
         .delete('/api/users/icellusedkars')
-      .expect(204)
+        .expect(204)
     })
     test('DELETE 404: Returns not found when user does not exist', () => {
       return request(app)
         .delete('/api/users/not_a_user')
         .expect(404)
         .then(({ body: { msg } }) => {
-        expect(msg).toBe('Username not found')
+          expect(msg).toBe('Username not found')
+        })
+    })
+  });
+  describe('ALL', () => {
+    test('ALL 405: Returns Method not allowed if called with any other method', () => {
+      return request(app)
+        .post('/api/users/icellusedkars')
+        .expect(405)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Method not allowed')
       })
     })
   })
@@ -1057,4 +1159,12 @@ describe("/api/users/:username/comments", () => {
         });
     });
   });
+  test('ALL 405: Returns Method not allowed if called with any other method', () => {
+    return request(app)
+      .post('/api/users/icellusedkars/comments')
+      .expect(405)
+      .then(({ body: { msg } }) => {
+      expect(msg).toBe('Method not allowed')
+    })
+  })
 });
