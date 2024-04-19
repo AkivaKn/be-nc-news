@@ -1,23 +1,26 @@
 const db = require("../connection");
+const sql = require('yesql').pg;
 
-exports.selectComments = (username, article_id, limit = 10, p = 1, sort_by = 'created_at',order = 'desc') => {
-  return validateInputs(limit, p, sort_by, order)
+
+exports.selectComments = (username, article_id, limit = 10, p = 1, sort_by = 'created_at', order = 'desc') => {
+  return this.commentsLength(username, article_id)
+    .then((comment_count) => {
+      return validateInputs(limit, p, sort_by, order,comment_count)
+  })
     .then(() => {
       let sqlStr = `SELECT * FROM comments `;
-      const queryVals = [];
+      const queryVals = {lim:limit,page:(p-1)*limit};
     
       if (username) {
-        sqlStr += `WHERE author=$1 `;
-        queryVals.push(username);
+        queryVals.user = username;
+        sqlStr += `WHERE author=:user `;
       } else if (article_id) {
-        sqlStr += `WHERE article_id=$1 `;
-        queryVals.push(article_id);
+        queryVals.article = article_id;
+        sqlStr += `WHERE article_id=:article `;
       }
     
-      sqlStr += `ORDER BY ${sort_by} ${order} LIMIT ${limit} OFFSET ${
-        (p - 1) * limit
-      };`;
-      return db.query(sqlStr, queryVals).then(({ rows }) => {
+      sqlStr += `ORDER BY ${sort_by} ${order} LIMIT :lim OFFSET :page;`;
+      return db.query(sql(sqlStr)(queryVals)).then(({ rows }) => {
         return rows;
       });
   })
@@ -67,7 +70,7 @@ exports.updateComment = (comment_id, inc_votes) => {
     });
 };
 
-function validateInputs  (limit, p, sort_by, order)  {
+function validateInputs  (limit, p, sort_by, order,comment_count)  {
   const validSortBy = ['comment_id', 'votes','created_at', 'author', 'body', 'article_id'];
   if (!validSortBy.includes(sort_by)) {
     return Promise.reject({status:400,msg:'Bad request'})
@@ -76,11 +79,25 @@ function validateInputs  (limit, p, sort_by, order)  {
   if (!validOrder.includes(order.toLowerCase())) {
     return Promise.reject({status:400,msg:'Bad request'})
   }
-  if (!Number(limit)) {
-    return Promise.reject({ status: 400, msg: "Bad request" });
-  }
-  if (!Number(p)) {
-    return Promise.reject({ status: 400, msg: "Bad request" });
+  if ((p - 1) * limit > comment_count) {
+    return Promise.reject({status:404,msg:'Page not found'})
   }
   return Promise.resolve()
+}
+
+exports.commentsLength = (username, article_id) => {
+  let sqlStr = `SELECT * FROM comments `
+  const queryVals = {};
+  if (username) {
+    queryVals.user = username;
+    sqlStr += `WHERE author=:user`;
+  } else if (article_id) {
+    queryVals.article = article_id;
+    sqlStr += `WHERE article_id=:article`;
+  }
+  sqlStr += `;`;
+  return db.query(sql(sqlStr)(queryVals))
+    .then(({ rows }) => {
+      return rows.length
+  })
 }

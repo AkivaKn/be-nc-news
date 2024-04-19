@@ -766,6 +766,14 @@ describe('/api/comments', () => {
         expect(msg).toBe('Bad request')
       })
     })
+    test('GET 404: Returns page not found when page does not exist', () => {
+      return request(app)
+        .get('/api/comments?p=100')
+        .expect(404)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Page not found')
+      })
+    })
     test("GET 400: Returns bad request when limit provided is not a number", () => {
       return request(app)
         .get("/api/comments?limit=45;SELECT * FROM articles;")
