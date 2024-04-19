@@ -6,7 +6,7 @@ const {
   removeArticle,
   articlesCount,
 } = require("../models/articles-model");
-const { checkTopicExists } = require("../models/topics-model");
+const { checkExists } = require("../models/utils-model");
 
 exports.getArticleById = (req, res, next) => {
   const { article_id } = req.params;
@@ -21,7 +21,7 @@ exports.getArticles = (req, res, next) => {
   const { topic, sort_by, order, limit, p } = req.query;
   return articlesCount(topic)
     .then((article_count) => {
-      return Promise.all([selectArticles(topic,sort_by,order,limit,p,article_count) ,article_count, checkTopicExists(topic)])
+      return Promise.all([selectArticles(topic,sort_by,order,limit,p,article_count) ,article_count, checkExists('topics','slug',topic,'Topic')])
   })
     .then(([articles,article_count]) => {
         res.status(200).send({ articles,article_count });

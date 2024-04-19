@@ -1,4 +1,4 @@
-const { checkExists } = require("../../db/seeds/utils");
+const { checkExists } = require("../models/utils-model");
 const {
   selectComments,
   insertComment,
