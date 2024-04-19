@@ -8,6 +8,7 @@ articleRouter
     .route('/')
     .get(getArticles)
     .post(postArticle)
+    .all()
 
 articleRouter
     .route('/:article_id')
