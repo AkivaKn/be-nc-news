@@ -1,3 +1,4 @@
+const { checkExists } = require("../../db/seeds/utils");
 const db = require("../connection");
 const sql = require('yesql').pg;
 
@@ -5,7 +6,7 @@ const sql = require('yesql').pg;
 exports.selectComments = (username, article_id, limit = 10, p = 1, sort_by = 'created_at', order = 'desc') => {
   return this.commentsLength(username, article_id)
     .then((comment_count) => {
-      return validateInputs(limit, p, sort_by, order,comment_count)
+      return Promise.all([validateInputs(limit, p, sort_by, order,comment_count),checkExists('articles','article_id',article_id,'Article'),checkExists('users','username',username,'Username')])
   })
     .then(() => {
       let sqlStr = `SELECT * FROM comments `;

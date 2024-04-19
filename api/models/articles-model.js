@@ -58,19 +58,6 @@ exports.updateArticle = (article_id, inc_votes) => {
     });
 };
 
-exports.checkArticleExists = (article_id) => {
-  if (article_id) {
-    return db.query(`SELECT * FROM articles WHERE article_id = $1;`, [article_id])
-      .then(({ rows }) => {
-        if (rows.length === 0) {
-        return Promise.reject({status:404,msg:'Article not found'})
-      }
-    })
-  } else {
-    return Promise.resolve()
-  }
-}
-
 exports.insertArticle = (newArticle) => {
   const {author,title,body,topic,article_img_url} = newArticle
   return db.query(`INSERT INTO articles (author,title,body,topic,article_img_url) VALUES ($1,$2,$3,$4,$5) RETURNING article_id;`, [author, title, body, topic, article_img_url])
