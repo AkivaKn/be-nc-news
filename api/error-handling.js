@@ -22,3 +22,7 @@ exports.serverError = (err, req, res, next) => {
   console.log(err)
   res.status(500).send({ msg: "Internal server error" });
 };
+
+exports.methodNotAllowed = (req, res, next) => {
+  next({status:405,msg:'Method not allowed'})
+}
