@@ -8,6 +8,7 @@
     "setup-dbs": "psql -f ./db/setup.sql",
     "seed": "node ./db/seeds/run-seed.js",
     "test": "jest",
+    "test-utils": "npm test __tests__/utils.test.js",
     "start": "node listen.js",
     "seed-prod": "NODE_ENV=production npm run seed"
   },
