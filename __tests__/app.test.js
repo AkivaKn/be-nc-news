@@ -313,7 +313,7 @@ describe("/api/articles", () => {
           expect(msg).toBe("Bad request");
         });
     });
-    test("POST 400: Returns bad request when passed with a topic that is not in database", () => {
+    test("POST 404: Returns Topic not found when passed with a topic that is not in database", () => {
       const newArticle = {
         title: "Sony Vaio; or, The Laptop",
         topic: "not_a_topic",
@@ -325,12 +325,12 @@ describe("/api/articles", () => {
       return request(app)
         .post("/api/articles")
         .send(newArticle)
-        .expect(400)
+        .expect(404)
         .then(({ body: { msg } }) => {
-          expect(msg).toBe("Bad request");
+          expect(msg).toBe("Topic not found");
         });
     });
-    test("POST 400: Returns bad request when passed with an author that is not in database", () => {
+    test("POST 404: Returns Author not found when passed with an author that is not in database", () => {
       const newArticle = {
         title: "Sony Vaio; or, The Laptop",
         topic: "mitch",
@@ -342,9 +342,9 @@ describe("/api/articles", () => {
       return request(app)
         .post("/api/articles")
         .send(newArticle)
-        .expect(400)
+        .expect(404)
         .then(({ body: { msg } }) => {
-          expect(msg).toBe("Bad request");
+          expect(msg).toBe("Author not found");
         });
     });
   });
@@ -669,7 +669,7 @@ describe("/api/articles/:article_id/comments", () => {
           expect(msg).toBe("Bad request");
         });
     });
-    test("POST 400: Returns bad request when passed a new comment with a username which doesn't exist", () => {
+    test("POST 404: Returns not found when passed a new comment with a username which doesn't exist", () => {
       const newComment = {
         username: "not a username",
         body: "I am a comment",
@@ -677,9 +677,9 @@ describe("/api/articles/:article_id/comments", () => {
       return request(app)
         .post("/api/articles/1/comments")
         .send(newComment)
-        .expect(400)
+        .expect(404)
         .then(({ body: { msg } }) => {
-          expect(msg).toBe("Bad request");
+          expect(msg).toBe("Author not found");
         });
     });
   });

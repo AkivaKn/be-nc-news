@@ -7,7 +7,11 @@ exports.customErrors = (err, req, res, next) => {
 };
 
 exports.psqlErrors = (err, req, res, next) => {
-  if (err.code === "22P02" || err.code === '23502' || err.code === '23503') {
+  if (err.constraint) {
+    const column = err.constraint.split('_')[1];
+    const capitalisedColumn = column.charAt(0).toUpperCase() + column.slice(1).toLowerCase();
+    res.status(404).send({msg:`${capitalisedColumn} not found`})
+  } else if (err.code === "22P02" || err.code === '23502' || err.code === '23503') {
     res.status(400).send({ msg: "Bad request" });
   } else {
     next(err);
