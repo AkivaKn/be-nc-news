@@ -20,7 +20,7 @@ jobs:
   app-tests:
     name: App test
     runs-on: ubuntu-latest
-    needs: Util test
+    needs: util-tests
     steps:
       - name: Checkout and clone
         uses: actions/checkout@v4.1.1
