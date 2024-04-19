@@ -4,6 +4,7 @@ const {
   updateArticle,
   insertArticle,
   removeArticle,
+  articlesCount,
 } = require("../models/articles-model");
 const { checkTopicExists } = require("../models/topics-model");
 
@@ -17,10 +18,13 @@ exports.getArticleById = (req, res, next) => {
 };
 
 exports.getArticles = (req, res, next) => {
-  const { topic ,sort_by,order,limit,p} = req.query;
-  return Promise.all([selectArticles(topic,sort_by,order,limit,p), checkTopicExists(topic)])
-    .then(([articles]) => {
-        res.status(200).send({ articles });
+  const { topic, sort_by, order, limit, p } = req.query;
+  return articlesCount(topic)
+    .then((article_count) => {
+      return Promise.all([selectArticles(topic,sort_by,order,limit,p,article_count) ,article_count, checkTopicExists(topic)])
+  })
+    .then(([articles,article_count]) => {
+        res.status(200).send({ articles,article_count });
       })
     .catch(next);
 };

@@ -1,4 +1,5 @@
 const db = require("../connection");
+const sql = require('yesql').pg;
 
 exports.selectArticleById = (article_id) => {
   return db
@@ -18,27 +19,27 @@ exports.selectArticleById = (article_id) => {
     });
 };
 
-exports.selectArticles = (topic, sort_by = 'created_at',order = 'desc',limit=10,p=1) => {
-  return validateInputs(sort_by, order, limit, p)
+exports.selectArticles = (topic, sort_by = 'created_at',order = 'desc',limit=10,p=1,article_count) => {
+      return validateInputs(sort_by, order,limit,p,article_count) 
     .then(() => {
-      let sqlStr = `SELECT articles.author,title,articles.article_id,topic,articles.created_at,articles.votes,article_img_url, COUNT(comment_id)::INT AS comment_count, COUNT(articles.article_id) OVER() ::INT AS article_count  
+      
+      let sqlStr = `SELECT articles.author,title,articles.article_id,topic,articles.created_at,articles.votes,article_img_url, COUNT(comment_id)::INT AS comment_count   
       FROM articles 
       LEFT JOIN comments 
       ON articles.article_id = comments.article_id 
       `;
-      const queryVals = [];
+      const queryVals = {lim:limit,page:(p-1)*limit};
     
       if (topic) {
-        sqlStr += `WHERE topic = $1`;
-        queryVals.push(topic);
+        queryVals.top = topic;
+        sqlStr += `WHERE topic = :top`;
       }
       sqlStr += ` GROUP BY
-      articles.article_id ORDER BY articles.${sort_by} ${order} LIMIT ${limit} OFFSET ${(p-1)*limit};`;
-      return db.query(sqlStr, queryVals).then(({ rows }) => {
+      articles.article_id ORDER BY articles.${sort_by} ${order} LIMIT :lim OFFSET :page;`;
+      return db.query(sql(sqlStr)(queryVals)).then(({ rows }) => {
         return rows;
-      });
-  })
-
+      })
+    })
 };
 
 exports.updateArticle = (article_id, inc_votes) => {
@@ -87,7 +88,7 @@ exports.removeArticle = (article_id) => {
   })
 }
 
-function validateInputs(sort_by, order, limit, p) {
+function validateInputs(sort_by, order, limit, p,article_count) {
   const validSortBy = ['author', 'title','article_id', 'topic', 'created_at', 'votes', 'article_img_url', 'comment_count'];
   if (!validSortBy.includes(sort_by)) {
     return Promise.reject({status:400,msg:'Bad request'})
@@ -98,12 +99,22 @@ function validateInputs(sort_by, order, limit, p) {
     return Promise.reject({status:400,msg:'Bad request'})
   }
  
-  if (!Number(limit)) {
-    return Promise.reject({status:400,msg:'Bad request'})
-  }
-
-  if (!Number(p)) {
-    return Promise.reject({status:400,msg:'Bad request'})
+  if ((p - 1) * limit > article_count) {
+    return Promise.reject({status:404,msg:'Page not found'})
   }
   return Promise.resolve()
+}
+
+exports.articlesCount = (topic) => {
+  let sqlStr = `SELECT * FROM articles `;
+  const queryVals = [];
+  if (topic) {
+    sqlStr += `WHERE topic = $1`;
+    queryVals.push(topic);
+  }
+  sqlStr += `;`
+  return db.query(sqlStr, queryVals)
+    .then(({ rows }) => {
+    return rows.length
+  })
 }

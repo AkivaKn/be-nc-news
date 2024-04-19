@@ -4,7 +4,6 @@ const data = require("../db/data/test-data");
 const seed = require("../db/seeds/seed");
 const db = require("../api/connection");
 const endpoints = require("../endpoints.json");
-const { reduceRight } = require("../db/data/test-data/articles");
 
 afterAll(() => {
   db.end();
@@ -177,26 +176,29 @@ describe("/api/articles", () => {
           expect(articles).toHaveLength(3);
         });
     });
+    test('GET 404: Returns page not found when page does not exist', () => {
+      return request(app)
+        .get('/api/articles?p=100')
+        .expect(404)
+        .then(({ body: { msg } }) => {
+        expect(msg).toBe('Page not found')
+      })
+    })
     test("GET 200: Returns articles with a total_count property matching the number of articles returned", () => {
       return request(app)
         .get("/api/articles?topic=cats")
         .expect(200)
-        .then(({ body: { articles } }) => {
-          expect(articles).toHaveLength(1);
-          articles.forEach((article) => {
-            expect(article.article_count).toBe(1);
-          });
+        .then(({ body: { article_count } }) => {
+         expect(article_count).toBe(1)
         });
     });
     test("GET 200: Ignores limit when returning total_count property", () => {
       return request(app)
         .get("/api/articles")
         .expect(200)
-        .then(({ body: { articles } }) => {
+        .then(({ body: { articles,article_count } }) => {
           expect(articles).toHaveLength(10);
-          articles.forEach((article) => {
-            expect(article.article_count).toBe(13);
-          });
+          expect(article_count).toBe(13)
         });
     });
     test("GET 200: Ignores limit when returning comment_count property", () => {
