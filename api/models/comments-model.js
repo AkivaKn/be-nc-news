@@ -1,4 +1,4 @@
-const { checkExists } = require("../../db/seeds/utils");
+const { checkExists } = require("./utils-model");
 const db = require("../connection");
 const sql = require('yesql').pg;
 
