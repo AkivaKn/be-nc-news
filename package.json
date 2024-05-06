@@ -33,11 +33,12 @@
     "supertest": "^6.3.4"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "dotenv": "^16.0.0",
     "express": "^4.19.2",
     "pg": "^8.7.3",
-    "yesql": "^7.0.0",
-    "pg-format": "^1.0.4"
+    "pg-format": "^1.0.4",
+    "yesql": "^7.0.0"
   },
   "jest": {
     "setupFilesAfterEnv": [
