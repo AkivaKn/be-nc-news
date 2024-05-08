@@ -35,7 +35,7 @@ exports.selectArticles = (topic, sort_by = 'created_at',order = 'desc',limit=10,
         sqlStr += `WHERE topic = :top`;
       }
       sqlStr += ` GROUP BY
-      articles.article_id ORDER BY articles.${sort_by} ${order} LIMIT :lim OFFSET :page;`;
+      articles.article_id ORDER BY ${sort_by} ${order} LIMIT :lim OFFSET :page;`;
       return db.query(sql(sqlStr)(queryVals)).then(({ rows }) => {
         return rows;
       })
